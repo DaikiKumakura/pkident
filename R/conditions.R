@@ -12,7 +12,8 @@ pki_codes <- c(
   PKI006 = "NO_PARAMETERS",
   PKI007 = "KNOWN_NOT_IN_MODEL",
   PKI008 = "OUTPUT_WITHOUT_STATE_OR_INPUT",
-  PKI009 = "INVALID_ARGUMENT"
+  PKI009 = "INVALID_ARGUMENT",
+  PKI010 = "SENSITIVITY_SOLVE_FAILED"
 )
 
 pki_abort <- function(code, message, call = NULL) {

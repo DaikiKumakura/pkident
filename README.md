@@ -2,7 +2,7 @@
 
 Structural and practical identifiability for pharmacokinetic and pharmacodynamic ODE models.
 
-**Status: in development (not released).** Milestones S1–S3 are complete: models are read from rxode2, and local structural identifiability is decided for all reference models.
+**Status: in development (not released).** Milestones S1–S4 are complete: models are read from rxode2, and local structural identifiability is decided by two independent methods (Lie derivatives at the known initial state, checked by output sensitivities solved with rxode2) that agree on all reference models.
 
 ```r
 library(pkident)
@@ -18,7 +18,8 @@ m <- pkpd_model(
 
 structural_identifiability(m)
 #> <pkident structural identifiability>
-#> Decision is LOCAL (Lie derivatives at the known initial state; 5 random points, derivative order up to 8).
+#> Decision is LOCAL (Lie derivatives at the known initial state up to order 8, checked by output sensitivities; 5 random points).
+#> Methods agree at 5 of 5 points.
 #>   CL           combination_only
 #>   F            combination_only
 #>   V            combination_only

@@ -108,3 +108,29 @@ The PD reference models need a **known input signal** (`Cp(t)`), not only bolus,
 For A2 the reported basis (CL/F, CL/V) differs from the form in the expected result (V/F, CL/F) but spans the same set of combinations; the test checks that V/F is orthogonal to the null space.
 
 Exploratory E1 (full TMDD; free drug observed; bolus `L(0) = DOSE/V`; target at its steady-state baseline `R(0) = ksyn/kdeg`; complex initially absent): all seven parameters (V, kel, kon, koff, ksyn, kdeg, kint) locally identifiable at derivative order 9. This agrees with the abstract of Eudy2015; the conditions of that paper could not be verified, so the case remains exploratory.
+
+## Results at milestone S4 (2026-10-05)
+
+`structural_identifiability(method = "both")`: the Lie method is checked at each of the 5 random points by the rank and null space of the output sensitivity matrix (rxode2, 151 time points from 0 to 200; known input signals replaced by a random smooth signal).
+
+| ID | Agreement (points, seeds 1–4) | Largest null-space distance | Smallest retained sensitivity ratio | Largest discarded ratio |
+| --- | --- | ---: | ---: | ---: |
+| A1 | 20/20 | 0 | 1.8e-1 | — |
+| A2 | 20/20 | 0 | 1.2e-2 | 6.7e-15 |
+| A3 | 20/20 | 0 | 1.2e-2 | — |
+| A4 | 20/20 | 0 | 3.0e-4 | — |
+| A5 | 20/20 | 0 | 2.9e-3 | — |
+| A6 | 20/20 | 0 | 1.6e-6 | — |
+| A7 | 20/20 | 0 | 6.8e-3 | 1.1e-16 |
+| A8 | 20/20 | 0 | 4.6e-4 | 1.3e-16 |
+| A9 | 20/20 | 0 | 7.4e-3 | 1.9e-16 |
+| A10 | 20/20 | 1.5e-8 | 2.0e-3 | 3.7e-16 |
+| A10, Rtot known | 20/20 | 0 | 3.7e-3 | — |
+
+Every decision is the same as at S3, and the sensitivity method alone also reproduces every expected result. Ratios are singular values relative to the largest, on the log-parameter scale; the threshold is 1e-7 with an ambiguous band down to 1e-10. The structural null directions lie at about 1e-16, at least nine orders of magnitude below the smallest retained value.
+
+The smallest retained values for A6 (1.6e-6, parallel linear and Michaelis–Menten elimination) and for exploratory E1 (1.6e-7, full TMDD) are close to the threshold. These directions are weakly determined at some random points (practical, not structural, weakness), and they are the reason for the ambiguous band: a value falling inside it gives `unresolved` rather than a decision.
+
+Exploratory E1 (full TMDD, conditions as at S3): both methods give rank 7 of 7 at all 5 points, so all seven parameters are locally identifiable.
+
+A test with only two time points (A4, `times = c(0, 0.001)`) checks the reconciliation rule: the sensitivity rank is too low, the methods disagree, and the result is `unresolved` with no parameter reported as non-identifiable.

@@ -7,7 +7,7 @@
 \usage{
 as_table(x, what, ...)
 
-\method{as_table}{pkident_structural}(x, what = c("parameters", "combinations", "rank"), ...)
+\method{as_table}{pkident_structural}(x, what = c("parameters", "combinations", "rank", "agreement"), ...)
 }
 \arguments{
 \item{x}{A pkident result.}

@@ -83,6 +83,15 @@ Why the initial state is used: in pharmacokinetic models the dose fixes the init
 
 **Secondary method: numerical check from sensitivities.** Solve the sensitivity equations with rxode2 and determine the rank of the noise-free output sensitivity matrix on a dense time grid at the same random points. If the two methods disagree, the result is `unresolved`.
 
+As implemented at S4:
+
+1. The forward sensitivity equations `dS/dt = (∂f/∂x)·S + ∂f/∂θ`, `S(0) = ∂x(0)/∂θ` are generated symbolically and solved with rxode2 (`rtol = 1e-10`, `atol = 1e-12`). Output sensitivities `∂h/∂x·S + ∂h/∂θ` are evaluated on the grid.
+2. Known input signals are replaced by a smooth random positive signal (a constant plus three sinusoids with random amplitudes, frequencies and phases), drawn after the Lie points so that the Lie results do not change.
+3. Default grid: time 0 and 150 log-spaced times from 0.001 to 200, which covers the rate constants implied by the random parameter values (0.2 to 5).
+4. Columns are scaled by the parameter values (log scale); each output block is scaled by the largest absolute value of the output and its sensitivities.
+5. Rank threshold: relative singular value 1e-7; values between 1e-10 and 1e-7 are ambiguous and give `unresolved`.
+6. Reconciliation (`method = "both"`, the default): at every point the two ranks must be equal and the largest principal-angle sine between the two null spaces must be below 1e-4. A parameter keeps its status only if both methods give the same status; otherwise it is `unresolved`. The comparison is returned as the `agreement` table.
+
 **Numerical rules**
 
 - Random points are fixed by a seed; five points by default. A conclusion is drawn only if all points give the same rank.
@@ -115,7 +124,7 @@ For each candidate supplied by the user (an added output, added time points, an 
 | --- | --- |
 | `pkpd_model(model, outputs, doses, parameters, known)` | Define the model, outputs, doses and known quantities |
 | `bolus()`, `infusion()` | Dose specifications |
-| `structural_identifiability(m, method = c("lie", "sensitivity", "both"), points = 5, seed)` | Structural identifiability |
+| `structural_identifiability(m, method = c("both", "lie", "sensitivity"), points = 5, seed)` | Structural identifiability |
 | `practical_identifiability(m, design, values, error)` | Practical identifiability from the Fisher information |
 | `classify_profiles(fit, which, grid)` | Classification of likelihood profiles (uses nlmixr2extra) |
 | `compare_designs(m, candidates)` | Comparison of candidate added measurements |
@@ -165,7 +174,7 @@ Using only public data and connecting to published analyses:
 - License GPL-3 (rxode2 and symengine are GPL).
 - All documentation (README, vignettes, help pages, NEWS) is in English.
 - Commits use the noreply identity. Before any publication, the private-term check is run with zero hits. Only public or synthetic data are used.
-- Errors and warnings carry codes (for example `PKI001 MODEL_PARSE_FAILED`, `PKI101 RANK_DISAGREEMENT`).
+- Errors and warnings carry codes (for example `PKI001 MODEL_PARSE_FAILED`, `PKI010 SENSITIVITY_SOLVE_FAILED`).
 - The repository is made public after milestone S3.
 
 ## 10. Milestones
@@ -174,8 +183,8 @@ Using only public data and connecting to published analyses:
 | --- | --- | --- |
 | S1 | Fix expected results for the reference models from primary literature | **Done 2026-10-05**: `validation/reference-models.md` (10 acceptance models, exploratory set) |
 | S2 | `pkpd_model()`: extract equations, outputs and inputs (including known input signals) from rxode2 models | **Done 2026-10-05**: all acceptance models (and the Rtot-known variant) load; 9 tests, 51 expectations; R CMD check OK |
-| S3 | Structural identifiability (Lie method) | **Done 2026-10-05**: all 10 acceptance models (and the Rtot-known variant) agree with expectations at 4 seeds; 17 tests, 196 expectations; R CMD check OK. Repository to be made public |
-| S4 | Sensitivity check and reconciliation of the two methods | Agreement reported |
+| S3 | Structural identifiability (Lie method) | **Done 2026-10-05**: all 10 acceptance models (and the Rtot-known variant) agree with expectations at 4 seeds; 17 tests, 196 expectations; R CMD check OK. Repository public 2026-10-05 |
+| S4 | Sensitivity check and reconciliation of the two methods | **Done 2026-10-05**: the two methods agree at every point for all acceptance models (and the Rtot-known variant) at 4 seeds, and for exploratory TMDD; the sensitivity method alone reproduces the expected results; disagreement gives `unresolved` (tested); 19 tests, 254 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
 | S5 | Practical identifiability (Fisher information) | Agreement on synthetic data confirmed |
 | S6 | Profile classification (nlmixr2extra) | Correct classification on synthetic data |
 | S7 | Comparison of added measurements | Case studies 2 and 3 produce results |

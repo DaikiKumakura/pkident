@@ -6,6 +6,7 @@
 \usage{
 structural_identifiability(
   m,
+  method = c("both", "lie", "sensitivity"),
   points = 5L,
   seed = 1L,
   max_order = NULL,
@@ -13,47 +14,77 @@ structural_identifiability(
   tol = 1e-07,
   max_seconds = 300,
   max_exponent = 2L,
-  max_support = 4L
+  max_support = 4L,
+  times = NULL,
+  sens_tol = 1e-07,
+  rtol = 1e-10,
+  atol = 1e-12
 )
 }
 \arguments{
 \item{m}{A \code{pkident_model} from \code{\link[=pkpd_model]{pkpd_model()}}.}
 
+\item{method}{\code{"both"} (Lie method checked by sensitivities), \code{"lie"} or
+\code{"sensitivity"}.}
+
 \item{points}{Number of random parameter points.}
 
 \item{seed}{Random seed for the points (the global random state is restored).}
 
-\item{max_order}{Highest derivative order. By default the number of
-parameters plus the number of states plus two, capped at 14.}
+\item{max_order}{Highest derivative order of the Lie method. By default the
+number of parameters plus the number of states plus two, capped at 14.}
 
 \item{plateau}{Number of consecutive orders without a rank increase needed
-to conclude rank deficiency.}
+to conclude rank deficiency (Lie method).}
 
-\item{tol}{Relative singular value below which a direction counts as null.}
+\item{tol}{Relative singular value below which a direction counts as null
+(Lie method).}
 
-\item{max_seconds}{Time limit; beyond it the result is \code{unresolved}.}
+\item{max_seconds}{Time limit of the Lie method; beyond it the result is
+\code{unresolved}.}
 
 \item{max_exponent, max_support}{Search limits for monomial combinations.}
+
+\item{times}{Time grid of the sensitivity method. By default 0 and 150
+log-spaced times from 0.001 to 200, which covers the rate constants
+implied by the random parameter points (between 0.2 and 5).}
+
+\item{sens_tol}{Relative singular value below which a direction counts as
+null (sensitivity method).}
+
+\item{rtol, atol}{Solver tolerances of the sensitivity method.}
 }
 \value{
 An object of class \code{pkident_structural}. Use \code{\link[=as_table]{as_table()}} to extract
-the \code{"parameters"}, \code{"combinations"} and \code{"rank"} tables.
+the \code{"parameters"}, \code{"combinations"}, \code{"rank"} (Lie method) and
+\code{"agreement"} (comparison of the methods at each point) tables.
 }
 \description{
 Decides local structural identifiability of the unknown parameters of a
-\code{\link[=pkpd_model]{pkpd_model()}}. The outputs are differentiated along the model (Lie
-derivatives), with known input signals contributing their own time
+\code{\link[=pkpd_model]{pkpd_model()}} with two independent methods.
+}
+\details{
+\strong{Lie method (primary).} The outputs are differentiated along the model
+(Lie derivatives), with known input signals contributing their own time
 derivatives, and evaluated at the known initial state at time zero (the
 Taylor-series approach). The parameters are locally identifiable if the
 Jacobian of these output derivatives with respect to the parameters has full
-rank. The rank is evaluated at several random parameter points on a log
-scale; a decision is made only if all points agree.
-}
-\details{
-Using the known initial state matters for pharmacokinetic models: a bolus
-dose fixes the initial amount, which is often what makes a volume
+rank. Using the known initial state matters for pharmacokinetic models: a
+bolus dose fixes the initial amount, which is often what makes a volume
 identifiable. Methods that evaluate the rank at generic initial states ignore
 this information.
+
+\strong{Sensitivity method (numerical check).} The forward sensitivity equations
+are generated symbolically and solved with rxode2 at the same parameter
+points; known input signals are replaced by a smooth random signal. The rank
+of the noise-free output sensitivity matrix on a dense time grid is compared
+with the Lie rank, and the null spaces of the two methods are compared at
+every point.
+
+With \code{method = "both"} (the default), a decision is made only if the two
+methods agree at every point; otherwise the result is \code{unresolved}. Ranks
+are evaluated at several random parameter points on a log scale, and a
+decision is made only if all points agree.
 
 Rank-deficient parameters are reported with the directions along which they
 can change together without changing the outputs. Where these directions
@@ -65,7 +96,7 @@ a finite number of alternative values elsewhere in parameter space (for
 example the flip-flop of absorption and elimination rates).
 }
 \examples{
-r <- structural_identifiability(reference_model("A2"))
+r <- structural_identifiability(reference_model("A2"), method = "lie")
 r
 as_table(r, "combinations")
 }
