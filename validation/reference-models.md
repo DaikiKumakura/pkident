@@ -86,3 +86,25 @@ The draft expected that full TMDD parameters are not determined without a target
 ## Implication for the specification
 
 The PD reference models need a **known input signal** (`Cp(t)`), not only bolus, infusion and depot doses. pkident v0.1 therefore supports known inputs whose time derivatives are treated as known quantities in the Lie-derivative method and as a known forcing function in the sensitivity method.
+
+## Results at milestone S3 (2026-10-05)
+
+`structural_identifiability()` with default settings (5 random points, seed 1). Every acceptance model agrees with its expected result; the decisions are the same with seeds 2, 3 and 4.
+
+| ID | Decision | Derivative order | Rank | Identifiable | Not identifiable alone | Identifiable combinations reported |
+| --- | --- | ---: | ---: | --- | --- | --- |
+| A1 | agrees | 1 | 2/2 | CL, V | — | — |
+| A2 | agrees | 8 | 3/4 | ka | CL, F, V | CL/F, CL/V (spans V/F) |
+| A3 | agrees | 3 | 3/3 | CL, ka, V | — | — |
+| A4 | agrees | 3 | 4/4 | CL, Q, V1, V2 | — | — |
+| A5 | agrees | 2 | 3/3 | KM, V, VMAX | — | — |
+| A6 | agrees | 3 | 4/4 | CL, KM, V, VMAX | — | — |
+| A7 | agrees | 5 | 2/3 | Kd | Rtot, ke | Rtot*ke |
+| A8 | agrees | 8 | 4/5 | Kd, kin, kout | Rtot, ke | Rtot*ke |
+| A9 | agrees | 7 | 3/4 | Kd, ke0 | Rtot, ke | Rtot*ke |
+| A10 | agrees | 9 | 4/5 | ke0, koff, kon | Rtot, ke | Rtot*ke |
+| A10, Rtot known | agrees | 5 | 4/4 | ke, ke0, koff, kon | — | — |
+
+For A2 the reported basis (CL/F, CL/V) differs from the form in the expected result (V/F, CL/F) but spans the same set of combinations; the test checks that V/F is orthogonal to the null space.
+
+Exploratory E1 (full TMDD; free drug observed; bolus `L(0) = DOSE/V`; target at its steady-state baseline `R(0) = ksyn/kdeg`; complex initially absent): all seven parameters (V, kel, kon, koff, ksyn, kdeg, kint) locally identifiable at derivative order 9. This agrees with the abstract of Eudy2015; the conditions of that paper could not be verified, so the case remains exploratory.

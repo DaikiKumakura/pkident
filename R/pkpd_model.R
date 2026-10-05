@@ -124,7 +124,7 @@ pkpd_model <- function(model, outputs, doses = list(), inputs = character(),
   }
   candidate <- setdiff(free, c(inputs, known))
   if (is.null(parameters)) {
-    parameters <- sort(candidate)
+    parameters <- sort(candidate, method = "radix")  # locale-independent order
   } else {
     extra <- setdiff(parameters, candidate)
     if (length(extra)) {

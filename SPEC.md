@@ -71,13 +71,15 @@ Every result uses only these statuses and never fills gaps by guessing:
 
 ### 5.1 Structural identifiability (core)
 
-**Primary method: the observability–identifiability rank condition using Lie derivatives** (the principle used by STRIKE-GOLDD).
+**Primary method: Lie derivatives of the outputs evaluated at the known initial state (Taylor-series approach).** Revised at milestone S3 (see below).
 
-1. Augment the state with the parameters (`dp/dt = 0`).
-2. Compute Lie derivatives of the outputs symbolically with `symengine`, using the symbolic representation available from `rxode2`.
-3. Evaluate the Jacobian with respect to states and parameters at several random points and determine its rank (generic rank).
-4. If the rank is deficient, use the null space of the Jacobian to report the directions along which parameters can move without changing the output, and hence the non-identifiable parameters and identifiable combinations.
-5. Known doses enter as fixed initial conditions or known inputs (with known derivatives).
+1. Compute Lie derivatives of the outputs symbolically with `symengine`, using the symbolic representation available from `rxode2`. Known input signals contribute their own time derivatives as additional known symbols.
+2. Substitute the known initial state (set by doses and initial conditions) at time zero. The output derivatives at time zero are then functions of the parameters only.
+3. Evaluate the Jacobian of these output derivatives with respect to the parameters, on a log scale and with normalized rows, at several random points, and determine its rank. Increase the derivative order until the rank is full, or until it has not increased for three consecutive orders (rank deficiency), or until a limit is reached (`unresolved`).
+4. If the rank is deficient, use the null space of the Jacobian to report the directions along which parameters can move without changing the output, the parameters that are not identifiable alone, and identifiable monomial combinations (for example `V/F`).
+5. Known input signals are given random values for themselves and their derivatives (a generic input).
+
+Why the initial state is used: in pharmacokinetic models the dose fixes the initial state, and this is often what makes a volume identifiable (for example `y(0) = DOSE/V`). The generic-state rank used by STRIKE-GOLDD treats initial states as unknown and would miss this information. Rank deficiency at a finite derivative order is a strong but not a formal proof of non-identifiability; the plateau rule and the agreement across points are recorded with every result, and the secondary method (S4) is a further check.
 
 **Secondary method: numerical check from sensitivities.** Solve the sensitivity equations with rxode2 and determine the rank of the noise-free output sensitivity matrix on a dense time grid at the same random points. If the two methods disagree, the result is `unresolved`.
 
@@ -172,7 +174,7 @@ Using only public data and connecting to published analyses:
 | --- | --- | --- |
 | S1 | Fix expected results for the reference models from primary literature | **Done 2026-10-05**: `validation/reference-models.md` (10 acceptance models, exploratory set) |
 | S2 | `pkpd_model()`: extract equations, outputs and inputs (including known input signals) from rxode2 models | **Done 2026-10-05**: all acceptance models (and the Rtot-known variant) load; 9 tests, 51 expectations; R CMD check OK |
-| S3 | Structural identifiability (Lie method) | Decisions agree with expectations, or are `unresolved` with a reason, for all ten acceptance models; **repository made public** |
+| S3 | Structural identifiability (Lie method) | **Done 2026-10-05**: all 10 acceptance models (and the Rtot-known variant) agree with expectations at 4 seeds; 17 tests, 196 expectations; R CMD check OK. Repository to be made public |
 | S4 | Sensitivity check and reconciliation of the two methods | Agreement reported |
 | S5 | Practical identifiability (Fisher information) | Agreement on synthetic data confirmed |
 | S6 | Profile classification (nlmixr2extra) | Correct classification on synthetic data |
