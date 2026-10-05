@@ -1,0 +1,25 @@
+"candidate","parameter","value","structural_status","rse_percent","practical_status","rse_ratio_to_first"
+"3 months","d",0.8,NA,118.021152112419,"unresolved",1
+"3 months","g",0.15,NA,5298.3487225597,"unresolved",1
+"3 months","r0",0.5,NA,3177.73891582825,"unresolved",1
+"3 months","s0",19.5,NA,78.0879657716632,"unresolved",1
+"6 months","d",0.8,NA,20.4470322898536,"identifiable",0.173248878899073
+"6 months","g",0.15,NA,200.307594745677,"unresolved",0.0378056646012733
+"6 months","r0",0.5,NA,182.870796888694,"unresolved",0.0575474580299277
+"6 months","s0",19.5,NA,12.6956063534226,"identifiable",0.162580830835647
+"9 months","d",0.8,NA,12.5006375259274,"identifiable",0.105918619689631
+"9 months","g",0.15,NA,47.1389869003708,"unresolved",0.00889692041213878
+"9 months","r0",0.5,NA,55.466675509091,"unresolved",0.0174547616963787
+"9 months","s0",19.5,NA,12.6308513074322,"identifiable",0.161751573147213
+"12 months","d",0.8,NA,10.2926681943137,"identifiable",0.087210368735509
+"12 months","g",0.15,NA,20.6244910611044,"identifiable",0.00389262620130834
+"12 months","r0",0.5,NA,29.4763552514861,"identifiable",0.00927588956558545
+"12 months","s0",19.5,NA,12.501132722296,"identifiable",0.160090387792282
+"18 months","d",0.8,NA,8.88295192862953,"identifiable",0.0752657618540127
+"18 months","g",0.15,NA,7.86859793897802,"identifiable",0.00148510382215397
+"18 months","r0",0.5,NA,15.2282181468582,"identifiable",0.0047921552242718
+"18 months","s0",19.5,NA,12.3420376328347,"identifiable",0.158053004849992
+"24 months","d",0.8,NA,8.39936673281153,"identifiable",0.0711683167167429
+"24 months","g",0.15,NA,4.35804833873292,"identifiable",0.000822529540227676
+"24 months","r0",0.5,NA,10.657993447108,"identifiable",0.00335395503828864
+"24 months","s0",19.5,NA,12.2688812887467,"identifiable",0.157116159545276

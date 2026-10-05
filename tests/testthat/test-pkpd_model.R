@@ -24,7 +24,7 @@ test_that("intermediate variables are substituted into the equations", {
   m <- pkpd_model("k = CL/V
                    d/dt(central) = -k*central
                    cp = central/V",
-                  outputs = "cp", doses = bolus("central", "DOSE"), known = "DOSE")
+                  outputs = "cp", doses = bolus_dose("central", "DOSE"), known = "DOSE")
   expect_false("k" %in% m$parameters)
   expect_setequal(m$parameters, c("CL", "V"))
 })
@@ -51,7 +51,7 @@ test_that("models without states are accepted", {
 test_that("an infusion adds its rate to the state equation", {
   m <- pkpd_model("d/dt(central) = -CL/V*central
                    cp = central/V",
-                  outputs = "cp", doses = infusion("central", "RATE"), known = "RATE")
+                  outputs = "cp", doses = infusion_dose("central", "RATE"), known = "RATE")
   expect_match(as.character(m$odes$central), "RATE", fixed = TRUE)
   expect_identical(as.character(m$initial$central), "0")
 })
@@ -59,7 +59,7 @@ test_that("an infusion adds its rate to the state equation", {
 test_that("compiled rxode2 objects and model functions are accepted", {
   rx <- suppressMessages(rxode2::rxode2("d/dt(central) = -CL/V*central
                                          cp = central/V"))
-  m1 <- pkpd_model(rx, outputs = "cp", doses = bolus("central", "DOSE"), known = "DOSE")
+  m1 <- pkpd_model(rx, outputs = "cp", doses = bolus_dose("central", "DOSE"), known = "DOSE")
   expect_setequal(m1$parameters, c("CL", "V"))
 
   f <- function() {
@@ -73,25 +73,25 @@ test_that("compiled rxode2 objects and model functions are accepted", {
       cp ~ add(add.sd)
     })
   }
-  m2 <- pkpd_model(f, outputs = "cp", doses = bolus("central", "DOSE"), known = "DOSE")
+  m2 <- pkpd_model(f, outputs = "cp", doses = bolus_dose("central", "DOSE"), known = "DOSE")
   expect_setequal(m2$parameters, c("tcl", "tv"))
 })
 
 test_that("errors carry codes", {
   code <- "d/dt(central) = -CL/V*central
            cp = central/V"
-  expect_error(pkpd_model(code, outputs = "conc", doses = bolus("central", "DOSE"), known = "DOSE"),
+  expect_error(pkpd_model(code, outputs = "conc", doses = bolus_dose("central", "DOSE"), known = "DOSE"),
                class = "pkident_PKI002")
-  expect_error(pkpd_model(code, outputs = "cp", doses = bolus("gut", "DOSE"), known = "DOSE"),
+  expect_error(pkpd_model(code, outputs = "cp", doses = bolus_dose("gut", "DOSE"), known = "DOSE"),
                class = "pkident_PKI004")
-  expect_error(pkpd_model(code, outputs = "cp", doses = bolus("central", "DOSE"), known = "DOSE", inputs = "Cp"),
+  expect_error(pkpd_model(code, outputs = "cp", doses = bolus_dose("central", "DOSE"), known = "DOSE", inputs = "Cp"),
                class = "pkident_PKI005")
-  expect_error(pkpd_model(code, outputs = "cp", doses = bolus("central", "DOSE"), known = c("DOSE", "WT")),
+  expect_error(pkpd_model(code, outputs = "cp", doses = bolus_dose("central", "DOSE"), known = c("DOSE", "WT")),
                class = "pkident_PKI007")
-  expect_error(pkpd_model(code, outputs = "cp", doses = list(bolus("central", "DOSE"), bolus("central", "DOSE")),
+  expect_error(pkpd_model(code, outputs = "cp", doses = list(bolus_dose("central", "DOSE"), bolus_dose("central", "DOSE")),
                           known = "DOSE"),
                class = "pkident_PKI003")
-  expect_error(pkpd_model(code, outputs = "cp", doses = bolus("central", "DOSE"), known = "DOSE",
+  expect_error(pkpd_model(code, outputs = "cp", doses = bolus_dose("central", "DOSE"), known = "DOSE",
                           parameters = "CL"),
                class = "pkident_PKI009")
   expect_error(pkpd_model("d/dt(central) = -CL/V*central +", outputs = "cp"), class = "pkident_PKI001")

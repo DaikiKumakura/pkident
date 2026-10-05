@@ -4,22 +4,33 @@
 \alias{residual_error}
 \title{Residual error model}
 \usage{
-residual_error(add = 0, prop = 0)
+residual_error(add = 0, prop = 0, exp = 0)
 }
 \arguments{
 \item{add}{Additive standard deviation (in the units of the output).}
 
 \item{prop}{Proportional standard deviation (for example 0.1 for 10\%).}
+
+\item{exp}{Standard deviation on the log scale (exponential error).}
 }
 \value{
 An object of class \code{pkident_residual}.
 }
 \description{
-Measurement error of an output: \code{sd = sqrt(add^2 + (prop * f)^2)}, where \code{f}
-is the model prediction (the \code{combined2} form of nlmixr2). Use \code{add} alone
-for additive error and \code{prop} alone for proportional error.
+Measurement error of an output. With \code{add} and \code{prop}:
+\code{sd = sqrt(add^2 + (prop * f)^2)}, where \code{f} is the model prediction (the
+\code{combined2} form of nlmixr2); use \code{add} alone for additive error and \code{prop}
+alone for proportional error. With \code{exp}: exponential error, that is
+additive error of standard deviation \code{exp} on the log scale (data fitted as
+\code{log(y)}). Exponential error is not combined with the others.
+}
+\details{
+Proportional and exponential errors differ in the Fisher information:
+with proportional error the variance depends on the parameters and carries
+information of its own; with exponential error it does not.
 }
 \examples{
 residual_error(prop = 0.1)
 residual_error(add = 0.05, prop = 0.1)
+residual_error(exp = 0.2)
 }

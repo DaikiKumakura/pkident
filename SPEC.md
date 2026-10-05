@@ -13,7 +13,7 @@ Intended use:
 ```r
 library(pkident)
 
-m <- pkpd_model(model, outputs = "cp", doses = bolus("depot"))
+m <- pkpd_model(model, outputs = "cp", doses = bolus_dose("depot"))
 
 structural_identifiability(m)            # parameters not determinable even with perfect data
 practical_identifiability(m, design)     # how weakly they are determined with this sampling and error
@@ -88,7 +88,7 @@ As implemented at S4:
 1. The forward sensitivity equations `dS/dt = (∂f/∂x)·S + ∂f/∂θ`, `S(0) = ∂x(0)/∂θ` are generated symbolically and solved with rxode2 (`rtol = 1e-10`, `atol = 1e-12`). Output sensitivities `∂h/∂x·S + ∂h/∂θ` are evaluated on the grid.
 2. Known input signals are replaced by a smooth random positive signal (a constant plus three sinusoids with random amplitudes, frequencies and phases), drawn after the Lie points so that the Lie results do not change.
 3. Default grid: time 0 and 150 log-spaced times from 0.001 to 200, which covers the rate constants implied by the random parameter values (0.2 to 5).
-4. Columns are scaled by the parameter values (log scale); each output block is scaled by the largest absolute value of the output and its sensitivities.
+4. Columns are scaled by the parameter values (log scale); each time point is scaled by its own magnitude (the larger of the output and its sensitivities), and rows that are not finite or below 1e8 × `atol` are dropped (revised at S7 for growing outputs).
 5. Rank threshold: relative singular value 1e-7; values between 1e-10 and 1e-7 are ambiguous and give `unresolved`.
 6. Reconciliation (`method = "both"`, the default): at every point the two ranks must be equal and the largest principal-angle sine between the two null spaces must be below 1e-4. A parameter keeps its status only if both methods give the same status; otherwise it is `unresolved`. The comparison is returned as the `agreement` table.
 
@@ -135,16 +135,24 @@ As implemented at S6 (`classify_profiles(fit, which, grid, threshold, steps, fla
 
 For each candidate supplied by the user (an added output, added time points, an added dose level), report how the structural rank and the expected relative standard errors change. No optimization.
 
+As implemented at S7 (`compare_designs(m, candidates, values, error)`, `experiment(times, events, values, n)`):
+
+1. A candidate is one or more experiments (groups of individuals with the same dosing and sampling). Doses come from the model definition or from an event table (`events`, for example repeated infusions); event doses must be known amounts or rates.
+2. The expected information of a candidate is the sum over its experiments; RSEs and statuses as in 5.2.
+3. The structural decision is computed once for each distinct set of observed outputs (it does not depend on sampling times or dose levels).
+4. Residual error may also be exponential (`residual_error(exp = )`, additive on the log scale, no variance term), matching data fitted as log concentrations.
+5. Case studies 2 and 3 are in `case-studies/` (results in `case-studies/README.md`).
+
 ## 6. Public functions (v0.1)
 
 | Function | Role |
 | --- | --- |
 | `pkpd_model(model, outputs, doses, parameters, known)` | Define the model, outputs, doses and known quantities |
-| `bolus()`, `infusion()` | Dose specifications |
+| `bolus_dose()`, `infusion_dose()` | Dose specifications (renamed at S7 from `bolus()` and `infusion()`, which clash with rxode2) |
 | `structural_identifiability(m, method = c("both", "lie", "sensitivity"), points = 5, seed)` | Structural identifiability |
 | `practical_identifiability(m, design, values, error, inputs, n)`, `residual_error(add, prop)` | Practical identifiability from the Fisher information |
 | `classify_profiles(fit, which, grid, threshold, structural, map)` | Classification of likelihood profiles (uses nlmixr2extra) |
-| `compare_designs(m, candidates)` | Comparison of candidate added measurements |
+| `compare_designs(m, candidates, values, error)`, `experiment()` | Comparison of candidate designs (added outputs, sampling times, dose levels) |
 | `as_table(x, what)` | Results as tibbles |
 
 Results are S3 objects: `print()` gives a summary and `as_table()` returns machine-readable tables. Each result records the method, random points, thresholds, package version and the statement that the decision is local.
@@ -204,7 +212,7 @@ Using only public data and connecting to published analyses:
 | S4 | Sensitivity check and reconciliation of the two methods | **Done 2026-10-05**: the two methods agree at every point for all acceptance models (and the Rtot-known variant) at 4 seeds, and for exploratory TMDD; the sensitivity method alone reproduces the expected results; disagreement gives `unresolved` (tested); 19 tests, 254 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
 | S5 | Practical identifiability (Fisher information) | **Done 2026-10-05**: information matches the analytic result (relative difference 1e-11); in four acceptance scenarios (A1, A3, A4, A10 with Rtot known) expected RSEs agree with the spread of 1,000 repeated estimates within 0.96–1.08; limitations recorded (RSE 30–40%: skewed estimates, spread underestimated) and the default RSE limit set to 30%; 27 tests, 280 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
 | S6 | Profile classification (nlmixr2extra) | **Done 2026-10-05**: on three synthetic FOCEi fits (identifiable; F unknown; Emax with concentrations far below EC50) all ten parameters are classified as expected, including shape and open direction, and profile intervals cover the true values; joined with structural results; 35 tests, 309 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
-| S7 | Comparison of added measurements | Case studies 2 and 3 produce results |
+| S7 | Comparison of added measurements | **Done 2026-10-05**: case study 2 (nimoData, full TMDD: cl, v, koff determined; kon, kdeg, r0, kint flat; total target would determine 6 of 7) and case study 3 (PSA: regrowth rate determined only after about 12 months) produce results; event-table dosing and exponential error checked against analytic information; sensitivity check revised for growing outputs (S4 rerun, unchanged); 42 tests; R CMD check 0 errors, 0 warnings, 0 notes |
 | S8 | Vignettes, CI, README, version 0.1.0 | R CMD check passes and case studies reproduce |
 
 ## 11. Main risks

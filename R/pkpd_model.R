@@ -10,7 +10,7 @@
 #'   (residual error lines containing `~` are ignored).
 #' @param outputs Names of the observed quantities: variables assigned in the
 #'   model or state names.
-#' @param doses A list of [bolus()] and [infusion()] specifications.
+#' @param doses A list of [bolus_dose()] and [infusion_dose()] specifications.
 #' @param inputs Names of known input signals (for example a plasma
 #'   concentration `Cp` driving a pharmacodynamic model). Their values and time
 #'   derivatives are treated as known.
@@ -27,7 +27,7 @@
 #'    d/dt(central) = ka*depot - CL/V*central
 #'    cp = central/V",
 #'   outputs = "cp",
-#'   doses = list(bolus("depot", "F*DOSE")),
+#'   doses = list(bolus_dose("depot", "F*DOSE")),
 #'   known = "DOSE"
 #' )
 #' m
@@ -39,7 +39,7 @@ pkpd_model <- function(model, outputs, doses = list(), inputs = character(),
     pki_abort("PKI009", "`outputs` must name at least one observed quantity.")
   }
   if (!all(vapply(doses, inherits, logical(1), "pkident_dose"))) {
-    pki_abort("PKI009", "`doses` must be a list of bolus() or infusion() specifications.")
+    pki_abort("PKI009", "`doses` must be a list of bolus_dose() or infusion_dose() specifications.")
   }
   if (length(initial) && (is.null(names(initial)) || any(!nzchar(names(initial))))) {
     pki_abort("PKI009", "`initial` must be a named list, for example list(E = \"kin/kout\").")
@@ -76,6 +76,10 @@ pkpd_model <- function(model, outputs, doses = list(), inputs = character(),
     if (o %in% states) symengine::S(o) else get(o, envir = sym)
   }), outputs)
 
+  # Equations before doses, used when doses are given as event tables
+  base_odes <- odes
+  base_init <- init
+
   # Doses
   dose_set <- character()
   for (d in doses) {
@@ -104,6 +108,7 @@ pkpd_model <- function(model, outputs, doses = list(), inputs = character(),
       pki_abort("PKI003", sprintf("State `%s` has more than one initial condition (model, bolus or initial).", s))
     }
     init[[s]] <- parse_expr(initial[[s]], sprintf("initial condition of `%s`", s))
+    base_init[[s]] <- init[[s]]
     dose_set <- c(dose_set, s)
   }
 
@@ -158,6 +163,7 @@ pkpd_model <- function(model, outputs, doses = list(), inputs = character(),
       known = known,
       doses = doses,
       time_dependent = any(time_symbols %in% all_symbols),
+      base = list(odes = base_odes, initial = base_init),
       source = list(code = code, rxode2_version = as.character(utils::packageVersion("rxode2")),
                     symengine_version = as.character(utils::packageVersion("symengine")))
     ),

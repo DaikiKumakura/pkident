@@ -93,14 +93,14 @@ compile_sensitivity_model <- function(m, input_lines = vapply(m$inputs, input_si
 # Outputs and their sensitivities dy/dtheta (natural scale) at the given
 # times. `v` holds parameter values, known constants and any input-signal
 # coefficients; `input_values` is a named list of input values at `times`.
-solve_output_sensitivities <- function(m, model, osf, v, times, input_values, rtol, atol) {
+solve_output_sensitivities <- function(m, model, osf, v, times, input_values, rtol, atol, events = NULL, allow_nonfinite = FALSE) {
   theta <- m$parameters
   n <- length(theta)
   vals <- list()
   if (!is.null(model)) {
     sol <- tryCatch(
       suppressMessages(suppressWarnings(rxode2::rxSolve(
-        model, params = v, events = rxode2::et(times), atol = atol, rtol = rtol,
+        model, params = v, events = if (is.null(events)) rxode2::et(times) else events, atol = atol, rtol = rtol,
         maxsteps = 1e6, returnType = "data.frame"
       ))),
       error = function(e) pki_abort("PKI010", paste("rxode2 could not solve the sensitivity equations:", conditionMessage(e)))
@@ -111,7 +111,7 @@ solve_output_sensitivities <- function(m, model, osf, v, times, input_values, rt
   for (p in c(theta, m$known)) vals[[p]] <- rep(v[[p]], length(times))
   for (u in m$inputs) vals[[u]] <- input_values[[u]]
   res <- matrix(do.call(osf$f, vals[osf$args]), nrow = length(times))
-  if (any(!is.finite(res))) pki_abort("PKI010", "Non-finite outputs or output sensitivities.")
+  if (!allow_nonfinite && any(!is.finite(res))) pki_abort("PKI010", "Non-finite outputs or output sensitivities.")
   out <- lapply(seq_along(m$outputs), function(k) {
     first <- (k - 1L) * (n + 1L) + 1L
     list(y = res[, first], S = res[, first + seq_len(n), drop = FALSE])
@@ -121,6 +121,7 @@ solve_output_sensitivities <- function(m, model, osf, v, times, input_values, rt
 
 # Rank of the scaled output sensitivity matrix at each point.
 sensitivity_ranks <- function(m, pts, signals, times, tol, rtol, atol) {
+  row_floor <- 1e8 * atol   # magnitudes resolved to about 1e-8 relative accuracy
   theta <- m$parameters
   n <- length(theta)
   osf <- output_sensitivity_function(m)
@@ -128,14 +129,18 @@ sensitivity_ranks <- function(m, pts, signals, times, tol, rtol, atol) {
   lapply(seq_along(pts), function(i) {
     v <- c(pts[[i]][c(theta, m$known)], signals[[i]])
     inp <- stats::setNames(lapply(m$inputs, input_signal_value, v = signals[[i]], times = times), m$inputs)
-    sol <- solve_output_sensitivities(m, model, osf, v, times, inp, rtol, atol)
+    sol <- solve_output_sensitivities(m, model, osf, v, times, inp, rtol, atol, allow_nonfinite = TRUE)
+    # Each time point is scaled by its own magnitude, so that growing or
+    # decaying outputs do not let a few time points dominate. Rows that are
+    # not finite or below what the solver resolves (atol) are dropped.
     blocks <- lapply(sol, function(o) {
       Sy <- sweep(o$S, 2, pts[[i]][theta], `*`)   # log-parameter scale
-      scale <- max(abs(o$y), abs(Sy))
-      if (!is.finite(scale) || scale == 0) scale <- 1
-      Sy / scale
+      scale <- pmax(abs(o$y), apply(abs(Sy), 1, max))
+      keep <- is.finite(scale) & scale > row_floor & apply(is.finite(Sy), 1, all)
+      Sy[keep, , drop = FALSE] / scale[keep]
     })
     J <- do.call(rbind, blocks)
+    if (!nrow(J)) J <- matrix(0, 1, n)
     sv <- svd(J, nu = 0, nv = n)
     d <- c(sv$d, rep(0, max(0, n - length(sv$d))))
     ratio <- d / max(d[1], .Machine$double.xmin)

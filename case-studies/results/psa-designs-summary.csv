@@ -1,0 +1,7 @@
+"candidate","outputs","experiments","observations","structural_decision","structural_rank","n_parameters","n_identifiable","max_rse_percent","condition_number"
+"3 months","psa",1,4,NA,NA,4,0,5298.3487225597,1306392.10324914
+"6 months","psa",1,7,NA,NA,4,2,200.307594745677,4056.99532518132
+"9 months","psa",1,10,NA,NA,4,2,55.466675509091,347.310352616153
+"12 months","psa",1,13,NA,NA,4,4,29.4763552514861,133.417487629273
+"18 months","psa",1,19,NA,NA,4,4,15.2282181468582,91.5600882373099
+"24 months","psa",1,25,NA,NA,4,4,12.2688812887467,126.413413381771

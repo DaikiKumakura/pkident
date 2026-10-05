@@ -1,0 +1,36 @@
+"candidate","parameter","value","structural_status","rse_percent","practical_status","rse_ratio_to_first"
+"current","cl",0.00432008344036023,"identifiable",35.1071964046936,"unresolved",1
+"current","kdeg",0.275604524114626,"identifiable",2848.49881377124,"unresolved",1
+"current","kint",4.76197436782705e-06,"identifiable",44217.1869877022,"unresolved",1
+"current","koff",0.000233154244757031,"identifiable",241.641362167361,"unresolved",1
+"current","kon",0.00230358888395861,"identifiable",2837.62771663346,"unresolved",1
+"current","r0",2.73687329306018,"identifiable",2829.53045108857,"unresolved",1
+"current","v",1.353432901683,"identifiable",8.96056831741158,"identifiable",1
+"+ total target","cl",0.00432008344036023,"identifiable",7.85260689269659,"identifiable",0.22367513492609
+"+ total target","kdeg",0.275604524114626,"identifiable",7.64185054261745,"identifiable",0.00268276416534649
+"+ total target","kint",4.76197436782705e-06,"identifiable",1054.50674626964,"unresolved",0.0238483453631486
+"+ total target","koff",0.000233154244757031,"identifiable",22.9084766586411,"identifiable",0.0948036232421777
+"+ total target","kon",0.00230358888395861,"identifiable",9.37623635260527,"identifiable",0.00330425175143453
+"+ total target","r0",2.73687329306018,"identifiable",5.67902341311788,"identifiable",0.00200705506135587
+"+ total target","v",1.353432901683,"identifiable",5.43849962206204,"identifiable",0.606936907282355
+"+ free target","cl",0.00432008344036023,"identifiable",9.48098800451853,"identifiable",0.270058249460529
+"+ free target","kdeg",0.275604524114626,"identifiable",16.0337025746082,"identifiable",0.00562882543502995
+"+ free target","kint",4.76197436782705e-06,"identifiable",16912.2148408024,"unresolved",0.382480569049002
+"+ free target","koff",0.000233154244757031,"identifiable",88.9869428954927,"unresolved",0.368260392580722
+"+ free target","kon",0.00230358888395861,"identifiable",12.7480554640225,"identifiable",0.00449250456263047
+"+ free target","r0",2.73687329306018,"identifiable",1.90859231721195,"identifiable",0.000674526162628035
+"+ free target","v",1.353432901683,"identifiable",5.86956380234212,"identifiable",0.655043697500389
+"+ complex","cl",0.00432008344036023,"identifiable",7.64736044167204,"identifiable",0.217828856326723
+"+ complex","kdeg",0.275604524114626,"identifiable",78.0488085085301,"unresolved",0.0273999792912669
+"+ complex","kint",4.76197436782705e-06,"identifiable",1055.53470119239,"unresolved",0.0238715932220193
+"+ complex","koff",0.000233154244757031,"identifiable",21.777291796698,"identifiable",0.0901223681300679
+"+ complex","kon",0.00230358888395861,"identifiable",78.5338381607028,"unresolved",0.0276758778822033
+"+ complex","r0",2.73687329306018,"identifiable",76.9296842454049,"unresolved",0.0271881450209552
+"+ complex","v",1.353432901683,"identifiable",5.42754509529257,"identifiable",0.60571438139098
+"+ 10 mg group","cl",0.00432008344036023,"identifiable",29.39869181097,"identifiable",0.837397879115166
+"+ 10 mg group","kdeg",0.275604524114626,"identifiable",2584.22128596679,"unresolved",0.907222173824759
+"+ 10 mg group","kint",4.76197436782705e-06,"identifiable",31796.1629552914,"unresolved",0.719090587199376
+"+ 10 mg group","koff",0.000233154244757031,"identifiable",173.448775058122,"unresolved",0.717794228200018
+"+ 10 mg group","kon",0.00230358888395861,"identifiable",2574.08655914479,"unresolved",0.907126239307624
+"+ 10 mg group","r0",2.73687329306018,"identifiable",2568.34445278386,"unresolved",0.907692812351877
+"+ 10 mg group","v",1.353432901683,"identifiable",7.65238560617324,"identifiable",0.854006725366251

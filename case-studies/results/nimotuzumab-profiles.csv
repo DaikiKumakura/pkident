@@ -1,0 +1,8 @@
+"parameter","estimate","status","shape","open_direction","lower","upper","profile_minimum","ofv_drop","explored_from","explored_to","n_fits","structural_parameter","structural_status","interpretation"
+"lcl",-5.44448056201445,"identifiable","bounded",NA,-6.90887382066474,-4.87666504633354,-5.54448056201445,0.0497795256017213,-7.44448056201445,-4.44448056201445,9,"cl","identifiable","determined by these data"
+"lv",0.302644254911362,"identifiable","bounded",NA,-0.0388858586713637,0.66421898371852,0.302644254911362,0,-0.197355745088638,0.802644254911362,6,"v","identifiable","determined by these data"
+"lkon",-6.0732869878519,"non_identifiable","flat","both",NA,NA,-8.0732869878519,0.703490557374366,-8.0732869878519,-4.0732869878519,10,"kon","identifiable","structurally identifiable but not determined by these data"
+"lkoff",-8.36381032875502,"identifiable","bounded",NA,-9.08075848140966,-7.25683323917229,-8.46381032875502,0.0501799173824367,-9.36381032875502,-6.36381032875502,9,"koff","identifiable","determined by these data"
+"lkdeg",-1.28878832446711,"non_identifiable","flat","both",NA,NA,-3.28878832446711,0.700711791941401,-3.28878832446711,0.711211675532887,10,"kdeg","identifiable","structurally identifiable but not determined by these data"
+"lr0",1.00681613489128,"non_identifiable","flat","both",NA,NA,3.00681613489128,0.257751448552924,-0.993183865108723,3.00681613489128,10,"r0","identifiable","structurally identifiable but not determined by these data"
+"lkint",-12.2548481925628,"non_identifiable","flat","both",NA,NA,-14.2548481925628,0.127420060976945,-14.2548481925628,-10.2548481925628,10,"kint","identifiable","structurally identifiable but not determined by these data"

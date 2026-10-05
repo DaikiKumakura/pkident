@@ -2,10 +2,10 @@
 #'
 #' Describe how a known dose enters the model.
 #'
-#' * `bolus()` sets the initial amount of a state (an instantaneous dose at
-#'   time zero), for example `bolus("depot", "F*DOSE")`.
-#' * `infusion()` adds a known zero-order input rate to a state, for example
-#'   `infusion("central", "RATE")`.
+#' * `bolus_dose()` sets the initial amount of a state (an instantaneous dose at
+#'   time zero), for example `bolus_dose("depot", "F*DOSE")`.
+#' * `infusion_dose()` adds a known zero-order input rate to a state, for example
+#'   `infusion_dose("central", "RATE")`.
 #'
 #' Symbols used in `amount` or `rate` that are not states become parameters
 #' unless they are declared as `known` in [pkpd_model()].
@@ -15,18 +15,18 @@
 #' @param rate Zero-order input rate, as a character expression.
 #' @return An object of class `pkident_dose`.
 #' @examples
-#' bolus("depot", "F*DOSE")
-#' infusion("central", "RATE")
+#' bolus_dose("depot", "F*DOSE")
+#' infusion_dose("central", "RATE")
 #' @export
-bolus <- function(state, amount = "DOSE") {
+bolus_dose <- function(state, amount = "DOSE") {
   check_string(state, "state")
   check_string(amount, "amount")
   structure(list(type = "bolus", state = state, expression = amount), class = "pkident_dose")
 }
 
-#' @rdname bolus
+#' @rdname bolus_dose
 #' @export
-infusion <- function(state, rate = "RATE") {
+infusion_dose <- function(state, rate = "RATE") {
   check_string(state, "state")
   check_string(rate, "rate")
   structure(list(type = "infusion", state = state, expression = rate), class = "pkident_dose")

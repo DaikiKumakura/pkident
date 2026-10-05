@@ -111,3 +111,15 @@ test_that("invalid input gives a coded error", {
   expect_error(structural_identifiability(reference_model("A1"), method = "sensitivity", times = c(0, Inf)),
                class = "pkident_PKI009")
 })
+
+test_that("growing outputs are handled by the sensitivity check", {
+  # decline and regrowth: the output grows by many orders of magnitude on the
+  # default time grid
+  m <- pkpd_model("d/dt(S) = -d*S
+                   d/dt(R) = g*R
+                   psa = S + R", outputs = "psa", initial = list(S = "s0", R = "r0"))
+  r <- structural_identifiability(m)
+  expect_identical(r$decision, "decided")
+  expect_true(all(r$agreement$agree))
+  expect_true(all(r$parameters$status == "identifiable"))
+})

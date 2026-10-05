@@ -11,6 +11,7 @@ practical_identifiability(
   error = residual_error(prop = 0.1),
   inputs = list(),
   n = 1,
+  events = NULL,
   rse_limit = 30,
   rtol = 1e-10,
   atol = 1e-12
@@ -34,6 +35,11 @@ character expressions in time \code{t}, for example
 
 \item{n}{Number of individuals with the same design (the information is
 multiplied by \code{n}).}
+
+\item{events}{Optional dosing event table (a data frame with columns
+\code{time}, \code{amt}, \code{cmt} and optionally \code{rate}), for example repeated
+infusions. It replaces the doses of the model definition; dose amounts
+and rates must be known.}
 
 \item{rse_limit}{RSE (\%) above which a parameter is \code{unresolved}.}
 
@@ -79,8 +85,8 @@ When any parameter is \code{unresolved}, the printed result therefore warns that
 the RSEs of all parameters are approximate.
 
 Doses are those in the model (bolus doses at time zero and constant-rate
-infusions); their amounts and rates are known constants supplied in
-\code{values}.
+infusions), whose amounts and rates are known constants supplied in
+\code{values}, or those of an event table given in \code{events}.
 }
 \examples{
 m <- reference_model("A3")

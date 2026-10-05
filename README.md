@@ -2,7 +2,7 @@
 
 Structural and practical identifiability for pharmacokinetic and pharmacodynamic ODE models.
 
-**Status: in development (not released).** Milestones S1–S6 are complete: models are read from rxode2; local structural identifiability is decided by two independent methods (Lie derivatives at the known initial state, checked by output sensitivities solved with rxode2) that agree on all reference models; practical identifiability for a given sampling design is assessed from the expected Fisher information, validated against repeated estimation on simulated data; and likelihood profiles of nlmixr2 fits are classified (bounded, one-sided, flat) and set against the structural result.
+**Status: in development (not released).** Milestones S1–S7 are complete: models are read from rxode2; local structural identifiability is decided by two independent methods (Lie derivatives at the known initial state, checked by output sensitivities solved with rxode2) that agree on all reference models; practical identifiability for a given sampling design is assessed from the expected Fisher information, validated against repeated estimation on simulated data; likelihood profiles of nlmixr2 fits are classified (bounded, one-sided, flat) and set against the structural result; and candidate designs (added outputs, sampling times, dose levels) are compared. See `case-studies/README.md` for two worked examples with public data and published model forms.
 
 ```r
 library(pkident)
@@ -12,7 +12,7 @@ m <- pkpd_model(
    d/dt(central) = ka*depot - CL/V*central
    cp            = central/V",
   outputs = "cp",
-  doses   = bolus("depot", "F*DOSE"),
+  doses   = bolus_dose("depot", "F*DOSE"),
   known   = "DOSE"
 )
 

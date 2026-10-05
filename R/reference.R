@@ -58,7 +58,7 @@ reference_specs <- list(
     source = "Analytical derivation",
     code = "d/dt(central) = -CL/V*central
             cp = central/V",
-    outputs = "cp", doses = list(bolus("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
+    outputs = "cp", doses = list(bolus_dose("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
     expected = expected(identifiable = c("CL", "V"))
   ),
   A2 = list(
@@ -67,7 +67,7 @@ reference_specs <- list(
     code = "d/dt(depot) = -ka*depot
             d/dt(central) = ka*depot - CL/V*central
             cp = central/V",
-    outputs = "cp", doses = list(bolus("depot", "F*DOSE")), inputs = character(), known = "DOSE", initial = list(),
+    outputs = "cp", doses = list(bolus_dose("depot", "F*DOSE")), inputs = character(), known = "DOSE", initial = list(),
     expected = expected(identifiable = "ka", non_identifiable = c("CL", "F", "V"), combinations = c("V/F", "CL/F"),
                         global_note = "ka is locally identifiable; flip-flop gives a second global solution")
   ),
@@ -77,7 +77,7 @@ reference_specs <- list(
     code = "d/dt(depot) = -ka*depot
             d/dt(central) = ka*depot - CL/V*central
             cp = central/V",
-    outputs = "cp", doses = list(bolus("depot", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
+    outputs = "cp", doses = list(bolus_dose("depot", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
     expected = expected(identifiable = c("CL", "V", "ka"),
                         global_note = "locally identifiable; not globally (flip-flop: (ka, k, V) and (k, ka, V*k/ka))")
   ),
@@ -87,7 +87,7 @@ reference_specs <- list(
     code = "d/dt(central) = -(CL/V1 + Q/V1)*central + Q/V2*peripheral
             d/dt(peripheral) = Q/V1*central - Q/V2*peripheral
             cp = central/V1",
-    outputs = "cp", doses = list(bolus("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
+    outputs = "cp", doses = list(bolus_dose("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
     expected = expected(identifiable = c("CL", "Q", "V1", "V2"))
   ),
   A5 = list(
@@ -95,7 +95,7 @@ reference_specs <- list(
     source = "Analytical derivation",
     code = "d/dt(central) = -VMAX*(central/V)/(KM + central/V)
             cp = central/V",
-    outputs = "cp", doses = list(bolus("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
+    outputs = "cp", doses = list(bolus_dose("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
     expected = expected(identifiable = c("KM", "V", "VMAX"))
   ),
   A6 = list(
@@ -103,7 +103,7 @@ reference_specs <- list(
     source = "Analytical derivation",
     code = "d/dt(central) = -CL/V*central - VMAX*(central/V)/(KM + central/V)
             cp = central/V",
-    outputs = "cp", doses = list(bolus("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
+    outputs = "cp", doses = list(bolus_dose("central", "DOSE")), inputs = character(), known = "DOSE", initial = list(),
     expected = expected(identifiable = c("CL", "KM", "V", "VMAX"))
   ),
   A7 = list(

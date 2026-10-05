@@ -115,22 +115,28 @@ Exploratory E1 (full TMDD; free drug observed; bolus `L(0) = DOSE/V`; target at 
 
 | ID | Agreement (points, seeds 1–4) | Largest null-space distance | Smallest retained sensitivity ratio | Largest discarded ratio |
 | --- | --- | ---: | ---: | ---: |
-| A1 | 20/20 | 0 | 1.8e-1 | — |
-| A2 | 20/20 | 0 | 1.2e-2 | 6.7e-15 |
-| A3 | 20/20 | 0 | 1.2e-2 | — |
-| A4 | 20/20 | 0 | 3.0e-4 | — |
-| A5 | 20/20 | 0 | 2.9e-3 | — |
-| A6 | 20/20 | 0 | 1.6e-6 | — |
-| A7 | 20/20 | 0 | 6.8e-3 | 1.1e-16 |
-| A8 | 20/20 | 0 | 4.6e-4 | 1.3e-16 |
-| A9 | 20/20 | 0 | 7.4e-3 | 1.9e-16 |
-| A10 | 20/20 | 1.5e-8 | 2.0e-3 | 3.7e-16 |
-| A10, Rtot known | 20/20 | 0 | 3.7e-3 | — |
+| A1 | 20/20 | 0 | 5.4e-1 | — |
+| A2 | 20/20 | 0 | 4.3e-2 | 6.3e-14 |
+| A3 | 20/20 | 0 | 4.0e-2 | — |
+| A4 | 20/20 | 0 | 1.7e-2 | — |
+| A5 | 20/20 | 0 | 7.3e-3 | — |
+| A6 | 20/20 | 0 | 5.5e-6 | — |
+| A7 | 20/20 | 0 | 6.9e-3 | 8.6e-17 |
+| A8 | 20/20 | 1.5e-8 | 4.5e-4 | 1.7e-16 |
+| A9 | 20/20 | 0 | 6.9e-3 | 2.0e-16 |
+| A10 | 20/20 | 1.5e-8 | 4.2e-3 | 1.1e-15 |
+| A10, Rtot known | 20/20 | 0 | 3.0e-3 | — |
 
-Every decision is the same as at S3, and the sensitivity method alone also reproduces every expected result. Ratios are singular values relative to the largest, on the log-parameter scale; the threshold is 1e-7 with an ambiguous band down to 1e-10. The structural null directions lie at about 1e-16, at least nine orders of magnitude below the smallest retained value.
+Values from the revised row scaling of 2026-10-05 (S7; see below).
 
-The smallest retained values for A6 (1.6e-6, parallel linear and Michaelis–Menten elimination) and for exploratory E1 (1.6e-7, full TMDD) are close to the threshold. These directions are weakly determined at some random points (practical, not structural, weakness), and they are the reason for the ambiguous band: a value falling inside it gives `unresolved` rather than a decision.
+Every decision is the same as at S3, and the sensitivity method alone also reproduces every expected result. Ratios are singular values relative to the largest, on the log-parameter scale; the threshold is 1e-7 with an ambiguous band down to 1e-10. The structural null directions lie at 1e-13 or below, at least seven orders of magnitude below the smallest retained value.
+
+The smallest retained values for A6 (5.5e-6, parallel linear and Michaelis–Menten elimination) and for exploratory E1 (1.0e-6, full TMDD) are the closest to the threshold. These directions are weakly determined at some random points (practical, not structural, weakness), and they are the reason for the ambiguous band: a value falling inside it gives `unresolved` rather than a decision.
 
 Exploratory E1 (full TMDD, conditions as at S3): both methods give rank 7 of 7 at all 5 points, so all seven parameters are locally identifiable.
 
 A test with only two time points (A4, `times = c(0, 0.001)`) checks the reconciliation rule: the sensitivity rank is too low, the methods disagree, and the result is `unresolved` with no parameter reported as non-identifiable.
+
+### Revision of the row scaling (2026-10-05, found at S7)
+
+In case study 3 (PSA decline and regrowth, `S' = -d S`, `R' = g R`), the sensitivity method disagreed with the Lie method at every point, so the result was `unresolved`. With growth rates of up to 5 on the default grid (up to time 200), the output grows by many orders of magnitude, and scaling each output block by its overall maximum left the early time points numerically invisible. Each time point is now scaled by its own magnitude (the larger of the output and its sensitivities), and rows that are not finite or below 1e-4 (1e8 × `atol`, where the solver's relative accuracy is about 1e-8) are dropped. The growth model then gives agreement at all points with the smallest retained ratio 0.002, and the acceptance results above were rerun with the new scaling: all decisions and agreements are unchanged.

@@ -22,7 +22,7 @@ character string, or a model function with \code{ini()} and \code{model()} block
 \item{outputs}{Names of the observed quantities: variables assigned in the
 model or state names.}
 
-\item{doses}{A list of \code{\link[=bolus]{bolus()}} and \code{\link[=infusion]{infusion()}} specifications.}
+\item{doses}{A list of \code{\link[=bolus_dose]{bolus_dose()}} and \code{\link[=infusion_dose]{infusion_dose()}} specifications.}
 
 \item{inputs}{Names of known input signals (for example a plasma
 concentration \code{Cp} driving a pharmacodynamic model). Their values and time
@@ -52,7 +52,7 @@ m <- pkpd_model(
    d/dt(central) = ka*depot - CL/V*central
    cp = central/V",
   outputs = "cp",
-  doses = list(bolus("depot", "F*DOSE")),
+  doses = list(bolus_dose("depot", "F*DOSE")),
   known = "DOSE"
 )
 m

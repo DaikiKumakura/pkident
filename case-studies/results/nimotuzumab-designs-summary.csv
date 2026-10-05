@@ -1,0 +1,6 @@
+"candidate","outputs","experiments","observations","structural_decision","structural_rank","n_parameters","n_identifiable","max_rse_percent","condition_number"
+"current","cp",12,321,"decided",7,7,1,44217.1869877022,175142023.410828
+"+ total target","cp, rtot",12,642,"decided",7,7,6,1054.50674626964,928721.154583316
+"+ free target","cp, R",12,642,"decided",7,7,5,16912.2148408024,415616019.526388
+"+ complex","cp, P",12,642,"decided",7,7,3,1055.53470119239,1015561.78414606
+"+ 10 mg group","cp",15,403,"decided",7,7,2,31796.1629552914,114444464.827997

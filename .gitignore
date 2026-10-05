@@ -3,3 +3,4 @@
 .RData
 *.tar.gz
 pkident.Rcheck/
+case-studies/results/*.log

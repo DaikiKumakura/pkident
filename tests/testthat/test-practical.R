@@ -56,7 +56,7 @@ test_that("known input signals and per-output designs are supported", {
   expect_true(all(p$parameters$status == "identifiable"))
 
   m2 <- pkpd_model("d/dt(central) = -CL/V*central
-                    cp = central/V", outputs = c("cp", "central"), doses = bolus("central", "DOSE"), known = "DOSE")
+                    cp = central/V", outputs = c("cp", "central"), doses = bolus_dose("central", "DOSE"), known = "DOSE")
   one <- practical_identifiability(m2, list(cp = tt), vals_a1, residual_error(add = 0.05, prop = 0.1))
   two <- practical_identifiability(m2, list(cp = tt, central = c(1, 4)), vals_a1,
                                    list(cp = residual_error(add = 0.05, prop = 0.1), central = residual_error(prop = 0.1)))
