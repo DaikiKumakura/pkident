@@ -123,6 +123,14 @@ As implemented at S5:
 - Reconcile with the structural result to distinguish "structurally identifiable but not determined by these data".
 - nlmixr2extra is a suggested dependency; without it, only this function is unavailable and says so.
 
+As implemented at S6 (`classify_profiles(fit, which, grid, threshold, steps, flat_tol, structural, map)`):
+
+1. Each side is explored by stepping away from the estimate (default 0.1, 0.25, 0.5, 1, 2 on the estimation scale), stopping once dOFV exceeds the threshold; or along a user grid.
+2. Points are evaluated with `nlmixr2extra::profileFixed()`. Because every profile fit is an upper bound of the profile, points more than `flat_tol` (default 1) above the original fit or above the lowest OFV found are re-estimated from a neighbouring profile point (warm start) and the lower value is kept.
+3. dOFV is measured from the lowest OFV found; a drop below the original fit is reported.
+4. Shapes: bounded, one-sided (open direction), flat (within `flat_tol`), shallow; failed fits give `unresolved`. Approximate interval ends are interpolated on the signed-root scale.
+5. With a structural result and a parameter map, each profile is interpreted as "determined by these data", "structurally identifiable but not determined by these data", "structurally non-identifiable", or a conflict.
+
 ### 5.4 Which measurement to add
 
 For each candidate supplied by the user (an added output, added time points, an added dose level), report how the structural rank and the expected relative standard errors change. No optimization.
@@ -135,7 +143,7 @@ For each candidate supplied by the user (an added output, added time points, an 
 | `bolus()`, `infusion()` | Dose specifications |
 | `structural_identifiability(m, method = c("both", "lie", "sensitivity"), points = 5, seed)` | Structural identifiability |
 | `practical_identifiability(m, design, values, error, inputs, n)`, `residual_error(add, prop)` | Practical identifiability from the Fisher information |
-| `classify_profiles(fit, which, grid)` | Classification of likelihood profiles (uses nlmixr2extra) |
+| `classify_profiles(fit, which, grid, threshold, structural, map)` | Classification of likelihood profiles (uses nlmixr2extra) |
 | `compare_designs(m, candidates)` | Comparison of candidate added measurements |
 | `as_table(x, what)` | Results as tibbles |
 
@@ -195,7 +203,7 @@ Using only public data and connecting to published analyses:
 | S3 | Structural identifiability (Lie method) | **Done 2026-10-05**: all 10 acceptance models (and the Rtot-known variant) agree with expectations at 4 seeds; 17 tests, 196 expectations; R CMD check OK. Repository public 2026-10-05 |
 | S4 | Sensitivity check and reconciliation of the two methods | **Done 2026-10-05**: the two methods agree at every point for all acceptance models (and the Rtot-known variant) at 4 seeds, and for exploratory TMDD; the sensitivity method alone reproduces the expected results; disagreement gives `unresolved` (tested); 19 tests, 254 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
 | S5 | Practical identifiability (Fisher information) | **Done 2026-10-05**: information matches the analytic result (relative difference 1e-11); in four acceptance scenarios (A1, A3, A4, A10 with Rtot known) expected RSEs agree with the spread of 1,000 repeated estimates within 0.96–1.08; limitations recorded (RSE 30–40%: skewed estimates, spread underestimated) and the default RSE limit set to 30%; 27 tests, 280 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
-| S6 | Profile classification (nlmixr2extra) | Correct classification on synthetic data |
+| S6 | Profile classification (nlmixr2extra) | **Done 2026-10-05**: on three synthetic FOCEi fits (identifiable; F unknown; Emax with concentrations far below EC50) all ten parameters are classified as expected, including shape and open direction, and profile intervals cover the true values; joined with structural results; 35 tests, 309 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
 | S7 | Comparison of added measurements | Case studies 2 and 3 produce results |
 | S8 | Vignettes, CI, README, version 0.1.0 | R CMD check passes and case studies reproduce |
 

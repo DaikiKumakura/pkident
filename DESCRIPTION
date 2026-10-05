@@ -18,5 +18,7 @@ Imports:
     tibble,
     utils
 Suggests:
+    nlmixr2est,
+    nlmixr2extra,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
