@@ -1,0 +1,19 @@
+Package: pkident
+Title: Structural and Practical Identifiability for Pharmacokinetic and Pharmacodynamic Models
+Version: 0.0.0.9000
+Authors@R: person("Daiki", "Kumakura", role = c("aut", "cre"), email = "55353329+DaikiKumakura@users.noreply.github.com")
+Description: Determines which parameters of pharmacokinetic and pharmacodynamic
+    ordinary differential equation models can be identified from a given dosing
+    and observation design, and which added measurement would make the others
+    identifiable. Decisions are local and are stated as such.
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: R (>= 4.1.0)
+Imports:
+    rxode2,
+    symengine
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
