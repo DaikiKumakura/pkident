@@ -1,0 +1,133 @@
+---
+title: "Case study: nimotuzumab target-mediated disposition"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Case study: nimotuzumab target-mediated disposition}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+extdata <- function(f) read.csv(system.file("extdata", f, package = "pkident"), check.names = FALSE)
+```
+
+```{r setup}
+library(pkident)
+```
+
+**Question.** Which parameters of a full target-mediated drug disposition
+(TMDD) model are determined by the public `nimoData` observations
+(nlmixr2data; source: Rodriguez-Vera et al. 2015), and which added
+measurement would determine the rest?
+
+The model fit and the likelihood profiles take about half an hour, so this
+vignette shows their code without running it and reads the stored results
+(`inst/extdata`), produced by `case-studies/nimotuzumab-tmdd.R` in the source
+repository. The structural analysis runs here.
+
+## Data and model
+
+`nimoData` has 12 patients at 50–400 mg, each with ten infusions and 321
+free-drug observations in total. DV is the log concentration; its unit is not
+documented, so the volume is in dose units per concentration unit. The full
+TMDD model has drug amount `A`, free target `R` (at its baseline `r0` before
+the first dose) and complex `P`:
+
+```{r}
+m <- pkpd_model(
+  "d/dt(A) = -cl/v*A - v*(kon*A/v*R - koff*P)
+   d/dt(R) = r0*kdeg - kdeg*R - kon*A/v*R + koff*P
+   d/dt(P) = kon*A/v*R - koff*P - kint*P
+   cp = A/v
+   rtot = R + P",
+  outputs = c("cp", "rtot", "R", "P"),
+  doses = bolus_dose("A", "DOSE"), initial = list(R = "r0"), known = "DOSE"
+)
+```
+
+## 1. Structure is not the obstacle
+
+With free drug observed alone, all seven parameters are locally identifiable:
+
+```{r}
+m_free <- m
+m_free$outputs <- m$outputs["cp"]
+structural_identifiability(m_free)
+```
+
+## 2. What these data determine
+
+The model was fitted with nlmixr2 (FOCEi; between-subject variability on
+`cl` and `v`; additive error on the log scale):
+
+```{r, eval = FALSE}
+fit <- nlmixr2est::nlmixr2(tmdd, nimoData, est = "focei")
+prof <- classify_profiles(fit, structural = structural_identifiability(m_free),
+                          map = c(lcl = "cl", lv = "v", lkon = "kon", lkoff = "koff",
+                                  lkdeg = "kdeg", lr0 = "r0", lkint = "kint"))
+```
+
+```{r}
+fit <- extdata("nimotuzumab-fit.csv")
+knitr::kable(fit[, c("parameter", "Estimate", "SE", "Back-transformed")], digits = 4)
+prof <- extdata("nimotuzumab-profiles.csv")
+knitr::kable(prof[, c("parameter", "estimate", "status", "shape", "lower", "upper", "interpretation")],
+             digits = 2)
+```
+
+Clearance, volume and `koff` are bounded. `kon`, `kdeg`, `r0` and `kint` are
+flat over a factor of 7.4 in each direction: structurally identifiable, but not
+determined by these data. The standard errors from nlmixr2's covariance step
+(0.17–0.48 on the log scale for these four) do not describe this.
+
+```{r, fig.width = 7, fig.height = 4}
+pts <- extdata("nimotuzumab-profile-points.csv")
+op <- par(mfrow = c(2, 4), mar = c(4, 4, 2, 1))
+for (p in unique(pts$parameter)) {
+  d <- pts[pts$parameter == p, ]
+  plot(d$value, d$dofv_from_minimum, type = "b", pch = 19, xlab = p, ylab = "dOFV",
+       ylim = c(0, max(8, d$dofv_from_minimum)), main = p)
+  abline(h = 3.84, lty = 2)
+}
+par(op)
+```
+
+## 3. Which measurement would determine the rest
+
+Expected RSEs at the fitted values for the actual design (each patient's own
+infusions and sampling times) and for candidates with an added measurement at
+the same times, or with an added 10 mg group. Target assays are assumed to
+have an error of 0.2 on the log scale.
+
+```{r, eval = FALSE}
+cmp <- compare_designs(
+  m,
+  candidates = list(current = current, `+ total target` = with_output("rtot"),
+                    `+ free target` = with_output("R"), `+ complex` = with_output("P"),
+                    `+ 10 mg group` = c(current, low_dose)),
+  values = values,
+  error = list(cp = residual_error(exp = 0.668), rtot = residual_error(exp = 0.2),
+               R = residual_error(exp = 0.2), P = residual_error(exp = 0.2))
+)
+```
+
+```{r}
+p <- extdata("nimotuzumab-designs-parameters.csv")
+tab <- reshape(p[, c("candidate", "parameter", "rse_percent")], idvar = "parameter",
+               timevar = "candidate", direction = "wide")
+names(tab) <- sub("rse_percent.", "", names(tab), fixed = TRUE)
+knitr::kable(tab, digits = 1, row.names = FALSE, caption = "Expected RSE (%)")
+s <- extdata("nimotuzumab-designs-summary.csv")
+knitr::kable(s[, c("candidate", "outputs", "observations", "n_identifiable", "n_parameters")])
+```
+
+**Answer.** Measuring total target at the same times would determine `kon`,
+`kdeg` and `r0` as well (six of seven parameters with RSE ≤ 30%); free target
+determines five; a lower dose group does not help. No candidate determines
+`kint`: at the estimate, internalisation of the complex barely affects any
+output.
+
+The expected RSEs (fixed effects of a typical patient, local approximation)
+and the profiles (the actual mixed-effects fit) agree on which parameters are
+determined; they differ in degree, for example for `koff`.

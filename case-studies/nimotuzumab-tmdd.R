@@ -18,7 +18,7 @@
 
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 suppressMessages({library(nlmixr2est); library(rxode2)})
-out_dir <- "case-studies/results"
+out_dir <- "inst/extdata"
 dir.create(out_dir, showWarnings = FALSE)
 
 # 1. Fit ----------------------------------------------------------------------

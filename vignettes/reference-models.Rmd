@@ -1,0 +1,105 @@
+---
+title: "Structural identifiability of reference PK/PD models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Structural identifiability of reference PK/PD models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(pkident)
+```
+
+pkident decides **local** structural identifiability: whether the unknown
+parameters of an ODE model are determined, in a neighbourhood of their values,
+by continuous noise-free observation of the outputs after the known doses. Two
+independent methods are used and must agree:
+
+* Lie derivatives of the outputs evaluated at the known initial state (the
+  Taylor-series approach), which keeps the information that a dose gives
+  about volumes;
+* the rank of the output sensitivity matrix, solved with rxode2.
+
+## A model, step by step
+
+A one-compartment model with first-order absorption and unknown
+bioavailability `F`:
+
+```{r}
+m <- pkpd_model(
+  "d/dt(depot)   = -ka*depot
+   d/dt(central) = ka*depot - CL/V*central
+   cp            = central/V",
+  outputs = "cp",
+  doses   = bolus_dose("depot", "F*DOSE"),
+  known   = "DOSE"
+)
+m
+```
+
+```{r}
+r <- structural_identifiability(m)
+r
+```
+
+`CL`, `F` and `V` are not identifiable alone; the reported combinations span
+the identifiable ones. The familiar `V/F` is among them:
+
+```{r}
+as_table(r, "combinations")
+as_table(r, "agreement")
+```
+
+## The acceptance set
+
+The package ships ten reference models whose expected results were fixed from
+primary literature (Janzén et al. 2016, Front Physiol 7:590) or derived
+analytically before any code was written, plus a variant of A10 with total
+receptors known.
+
+```{r}
+reference_models()
+```
+
+```{r}
+decide <- function(id) {
+  m <- reference_model(id)
+  r <- structural_identifiability(m)
+  p <- r$parameters
+  data.frame(
+    model = id,
+    decision = r$decision,
+    methods_agree = sum(r$agreement$agree),
+    identifiable = paste(p$parameter[p$status == "identifiable"], collapse = ", "),
+    not_alone = paste(p$parameter[p$status != "identifiable"], collapse = ", "),
+    combinations = paste(r$combinations$combination, collapse = ", "),
+    matches_literature = setequal(p$parameter[p$status == "identifiable"],
+                                  attr(m, "expected")$identifiable)
+  )
+}
+results <- do.call(rbind, lapply(reference_models()$id, decide))
+knitr::kable(results)
+```
+
+Every decision matches the expected result, and the two methods agree at all
+five random points for every model.
+
+## Reading the results
+
+* `identifiable`: locally identifiable. It may still have a finite number of
+  alternative values (A3, the oral model with `F` known, has the flip-flop
+  solution of absorption and elimination).
+* `combination_only`: not identifiable alone, but identifiable within a
+  reported combination.
+* `non_identifiable`: not identifiable, and in no reported combination.
+* `unresolved`: the computation could not decide (limits reached, poor
+  conditioning, or the two methods disagree). pkident never turns an
+  undecided case into a decision.
+
+See `validation/reference-models.md` in the source repository for the
+derivations and the full validation record.

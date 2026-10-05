@@ -1,0 +1,90 @@
+---
+title: "Case study: how long must PSA be followed to estimate regrowth?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Case study: how long must PSA be followed to estimate regrowth?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(pkident)
+```
+
+A treatment-sensitive PSA component declines while a resistant component
+grows: the ODE form of the biexponential decline-and-regrowth model used for
+PSA and tumour size (for example Stein et al., Clin Cancer Res 2008).
+
+```{r}
+m <- pkpd_model(
+  "d/dt(S) = -d*S
+   d/dt(R) = g*R
+   psa = S + R",
+  outputs = "psa", initial = list(S = "s0", R = "r0")
+)
+```
+
+The parameter values below are **illustrative**, not estimates from data:
+PSA 20 ng/mL at the start of treatment, 2.5% from the resistant component,
+sensitive half-life about 3.5 weeks (`d` = 0.8 per month), resistant doubling
+time about 4.6 months (`g` = 0.15 per month). PSA reaches its nadir at about
+5.6 months.
+
+```{r}
+values <- c(s0 = 19.5, r0 = 0.5, d = 0.8, g = 0.15)
+error <- residual_error(add = 0.05, prop = 0.15)
+```
+
+## Structure
+
+From PSA alone, all four parameters are locally identifiable:
+
+```{r}
+structural_identifiability(m)
+```
+
+## Length of observation
+
+One patient sampled monthly from the start of treatment, for 3 to 24 months:
+
+```{r}
+lengths <- c(3, 6, 9, 12, 18, 24)
+candidates <- setNames(lapply(lengths, function(L) experiment(seq(0, L, 1))),
+                       paste0(lengths, " months"))
+cmp <- compare_designs(m, candidates, values = values, error = error, structural = FALSE)
+cmp
+```
+
+```{r, fig.width = 6, fig.height = 4}
+p <- as_table(cmp, "parameters")
+g <- p[p$parameter == "g", ]
+d <- p[p$parameter == "d", ]
+plot(lengths, g$rse_percent, log = "y", type = "b", pch = 19, ylim = c(3, 6000),
+     xlab = "Months of follow-up", ylab = "Expected RSE (%)")
+lines(lengths, d$rse_percent, type = "b", pch = 1, lty = 2)
+abline(h = 30, col = "grey50")
+abline(v = 5.6, col = "grey50", lty = 3)
+legend("topright", c("regrowth rate g", "decline rate d", "RSE 30%", "nadir"),
+       lty = c(1, 2, 1, 3), pch = c(19, 1, NA, NA), col = c(1, 1, "grey50", "grey50"), bty = "n")
+```
+
+The decline rate is determined by 6 months. The regrowth rate is not
+determined until PSA has been followed well past the nadir: its expected RSE
+falls below 30% only at about 12 months, twice the time to nadir.
+
+## Do the expected RSEs hold?
+
+The expected RSEs come from a local, linear approximation. For 12 and 24
+months, 1,000 patients were simulated and each was fitted by maximum
+likelihood (`case-studies/psa-regrowth.R` in the source repository):
+
+```{r}
+chk <- read.csv(system.file("extdata", "psa-simulation-check.csv", package = "pkident"))
+knitr::kable(chk[, c("months", "parameter", "expected_rse", "empirical_rse", "ratio")], digits = 2)
+```
+
+The spread of the estimates is within 6% of the expected RSE.

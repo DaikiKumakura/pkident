@@ -17,7 +17,7 @@
 
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 source("tests/testthat/helper-fim-simulation.R")
-out_dir <- "case-studies/results"
+out_dir <- "inst/extdata"
 dir.create(out_dir, showWarnings = FALSE)
 
 m <- pkpd_model(

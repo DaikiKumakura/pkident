@@ -1,6 +1,6 @@
 # Case studies (milestone S7)
 
-Run on 2026-10-05 from the package root (pkident 0.0.0.9000, rxode2 5.1.8, nlmixr2est 7.1.0, nlmixr2extra 5.2.1). Result tables are in `results/`. These scripts will become vignettes at milestone S8.
+Run on 2026-10-05 from the package root (pkident 0.0.0.9000, rxode2 5.1.8, nlmixr2est 7.1.0, nlmixr2extra 5.2.1). Result tables are in `inst/extdata/` (installed with the package and used by the vignettes). The vignettes present the same analyses.
 
 ## Case study 2: nimotuzumab target-mediated disposition (`nimotuzumab-tmdd.R`)
 
