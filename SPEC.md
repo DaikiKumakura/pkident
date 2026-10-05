@@ -105,6 +105,15 @@ As implemented at S4:
 - Eigen-decomposition to report weakly determined directions, the condition number and expected relative standard errors (%).
 - Population (between-subject variability) information is considered for v0.2, avoiding overlap with PopED.
 
+As implemented at S5:
+
+1. Output sensitivities come from the same sensitivity equations as S4, solved with rxode2 at the given parameter values; known input signals are given as expressions in `t`.
+2. Residual error `sd = sqrt(add^2 + (prop·f)^2)` (`residual_error()`, the nlmixr2 `combined2` form), one per output or shared.
+3. Information per observation: `S'S/σ² + 2·prop⁴·f²·S'S/σ⁴` — the second term comes from the dependence of the variance on the parameters. Multiplied by `n` individuals with the same design.
+4. Eigen-decomposition on the log-parameter scale; directions with relative eigenvalue below 1e-10 are null. Parameters in a null direction are `non_identifiable` (RSE infinite); otherwise the RSE comes from the (pseudo-)inverse.
+5. Status: `identifiable` if RSE ≤ `rse_limit` (default 30%), `unresolved` above it, with a printed warning that the RSEs of all parameters are then approximate and likelihood profiles should be examined.
+6. Validation (`validation/fim-simulation.R`): maximum-likelihood estimates from 1,000 simulated data sets per scenario; the fitting routine is cross-checked against derivative-free Nelder–Mead.
+
 ### 5.3 Classification of likelihood profiles from actual fits
 
 - For nlmixr2 FOCEi fits, obtain objective function values along a grid of fixed values with `nlmixr2extra::profileFixed()` and classify following Raue et al. (2009):
@@ -125,7 +134,7 @@ For each candidate supplied by the user (an added output, added time points, an 
 | `pkpd_model(model, outputs, doses, parameters, known)` | Define the model, outputs, doses and known quantities |
 | `bolus()`, `infusion()` | Dose specifications |
 | `structural_identifiability(m, method = c("both", "lie", "sensitivity"), points = 5, seed)` | Structural identifiability |
-| `practical_identifiability(m, design, values, error)` | Practical identifiability from the Fisher information |
+| `practical_identifiability(m, design, values, error, inputs, n)`, `residual_error(add, prop)` | Practical identifiability from the Fisher information |
 | `classify_profiles(fit, which, grid)` | Classification of likelihood profiles (uses nlmixr2extra) |
 | `compare_designs(m, candidates)` | Comparison of candidate added measurements |
 | `as_table(x, what)` | Results as tibbles |
@@ -185,7 +194,7 @@ Using only public data and connecting to published analyses:
 | S2 | `pkpd_model()`: extract equations, outputs and inputs (including known input signals) from rxode2 models | **Done 2026-10-05**: all acceptance models (and the Rtot-known variant) load; 9 tests, 51 expectations; R CMD check OK |
 | S3 | Structural identifiability (Lie method) | **Done 2026-10-05**: all 10 acceptance models (and the Rtot-known variant) agree with expectations at 4 seeds; 17 tests, 196 expectations; R CMD check OK. Repository public 2026-10-05 |
 | S4 | Sensitivity check and reconciliation of the two methods | **Done 2026-10-05**: the two methods agree at every point for all acceptance models (and the Rtot-known variant) at 4 seeds, and for exploratory TMDD; the sensitivity method alone reproduces the expected results; disagreement gives `unresolved` (tested); 19 tests, 254 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
-| S5 | Practical identifiability (Fisher information) | Agreement on synthetic data confirmed |
+| S5 | Practical identifiability (Fisher information) | **Done 2026-10-05**: information matches the analytic result (relative difference 1e-11); in four acceptance scenarios (A1, A3, A4, A10 with Rtot known) expected RSEs agree with the spread of 1,000 repeated estimates within 0.96–1.08; limitations recorded (RSE 30–40%: skewed estimates, spread underestimated) and the default RSE limit set to 30%; 27 tests, 280 expectations; R CMD check 0 errors, 0 warnings, 0 notes |
 | S6 | Profile classification (nlmixr2extra) | Correct classification on synthetic data |
 | S7 | Comparison of added measurements | Case studies 2 and 3 produce results |
 | S8 | Vignettes, CI, README, version 0.1.0 | R CMD check passes and case studies reproduce |

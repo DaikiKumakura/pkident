@@ -42,9 +42,9 @@ input_signal_value <- function(u, v, times) {
 }
 
 # rxode2 code for the states and their parameter sensitivities.
-sensitivity_code <- function(m) {
+sensitivity_code <- function(m, input_lines = vapply(m$inputs, input_signal_code, character(1))) {
   theta <- m$parameters
-  lines <- vapply(m$inputs, input_signal_code, character(1))
+  lines <- unname(input_lines)
   for (s in m$states) {
     lines <- c(lines, sprintf("d/dt(%s) = %s", s, as.character(m$odes[[s]])))
     if (as.character(m$initial[[s]]) != "0") {
@@ -82,46 +82,60 @@ output_sensitivity_function <- function(m) {
   list(f = as.function(do.call(symengine::Vector, exprs), args = args), args = args)
 }
 
+compile_sensitivity_model <- function(m, input_lines = vapply(m$inputs, input_signal_code, character(1))) {
+  if (!length(m$states)) return(NULL)
+  tryCatch(
+    suppressMessages(rxode2::rxode2(sensitivity_code(m, input_lines))),
+    error = function(e) pki_abort("PKI010", paste("rxode2 could not compile the sensitivity equations:", conditionMessage(e)))
+  )
+}
+
+# Outputs and their sensitivities dy/dtheta (natural scale) at the given
+# times. `v` holds parameter values, known constants and any input-signal
+# coefficients; `input_values` is a named list of input values at `times`.
+solve_output_sensitivities <- function(m, model, osf, v, times, input_values, rtol, atol) {
+  theta <- m$parameters
+  n <- length(theta)
+  vals <- list()
+  if (!is.null(model)) {
+    sol <- tryCatch(
+      suppressMessages(suppressWarnings(rxode2::rxSolve(
+        model, params = v, events = rxode2::et(times), atol = atol, rtol = rtol,
+        maxsteps = 1e6, returnType = "data.frame"
+      ))),
+      error = function(e) pki_abort("PKI010", paste("rxode2 could not solve the sensitivity equations:", conditionMessage(e)))
+    )
+    if (nrow(sol) != length(times)) pki_abort("PKI010", "The sensitivity equations could not be solved on the time grid.")
+    for (nm in setdiff(osf$args, c(theta, m$known, m$inputs))) vals[[nm]] <- sol[[nm]]
+  }
+  for (p in c(theta, m$known)) vals[[p]] <- rep(v[[p]], length(times))
+  for (u in m$inputs) vals[[u]] <- input_values[[u]]
+  res <- matrix(do.call(osf$f, vals[osf$args]), nrow = length(times))
+  if (any(!is.finite(res))) pki_abort("PKI010", "Non-finite outputs or output sensitivities.")
+  out <- lapply(seq_along(m$outputs), function(k) {
+    first <- (k - 1L) * (n + 1L) + 1L
+    list(y = res[, first], S = res[, first + seq_len(n), drop = FALSE])
+  })
+  stats::setNames(out, names(m$outputs))
+}
+
 # Rank of the scaled output sensitivity matrix at each point.
 sensitivity_ranks <- function(m, pts, signals, times, tol, rtol, atol) {
   theta <- m$parameters
   n <- length(theta)
   osf <- output_sensitivity_function(m)
-  model <- NULL
-  if (length(m$states)) {
-    model <- tryCatch(
-      suppressMessages(rxode2::rxode2(sensitivity_code(m))),
-      error = function(e) pki_abort("PKI010", paste("rxode2 could not compile the sensitivity equations:", conditionMessage(e)))
-    )
-  }
+  model <- compile_sensitivity_model(m)
   lapply(seq_along(pts), function(i) {
     v <- c(pts[[i]][c(theta, m$known)], signals[[i]])
-    vals <- list()
-    if (!is.null(model)) {
-      sol <- tryCatch(
-        suppressMessages(suppressWarnings(rxode2::rxSolve(
-          model, params = v, events = rxode2::et(times), atol = atol, rtol = rtol,
-          maxsteps = 1e6, returnType = "data.frame"
-        ))),
-        error = function(e) pki_abort("PKI010", paste("rxode2 could not solve the sensitivity equations:", conditionMessage(e)))
-      )
-      if (nrow(sol) != length(times)) pki_abort("PKI010", "The sensitivity equations could not be solved on the time grid.")
-      for (nm in setdiff(osf$args, c(theta, m$known, m$inputs))) vals[[nm]] <- sol[[nm]]
-    }
-    for (p in c(theta, m$known)) vals[[p]] <- rep(v[[p]], length(times))
-    for (u in m$inputs) vals[[u]] <- input_signal_value(u, signals[[i]], times)
-    res <- do.call(osf$f, vals[osf$args])
-    res <- matrix(res, nrow = length(times))
-    blocks <- lapply(seq_along(m$outputs), function(k) {
-      cols <- (k - 1L) * (n + 1L) + 1L + seq_len(n)
-      y <- res[, (k - 1L) * (n + 1L) + 1L]
-      Sy <- sweep(res[, cols, drop = FALSE], 2, pts[[i]][theta], `*`)   # log-parameter scale
-      scale <- max(abs(y), abs(Sy))
+    inp <- stats::setNames(lapply(m$inputs, input_signal_value, v = signals[[i]], times = times), m$inputs)
+    sol <- solve_output_sensitivities(m, model, osf, v, times, inp, rtol, atol)
+    blocks <- lapply(sol, function(o) {
+      Sy <- sweep(o$S, 2, pts[[i]][theta], `*`)   # log-parameter scale
+      scale <- max(abs(o$y), abs(Sy))
       if (!is.finite(scale) || scale == 0) scale <- 1
       Sy / scale
     })
     J <- do.call(rbind, blocks)
-    if (any(!is.finite(J))) pki_abort("PKI010", "Non-finite output sensitivities.")
     sv <- svd(J, nu = 0, nv = n)
     d <- c(sv$d, rep(0, max(0, n - length(sv$d))))
     ratio <- d / max(d[1], .Machine$double.xmin)

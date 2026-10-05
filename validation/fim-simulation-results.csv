@@ -1,0 +1,21 @@
+"scenario","label","parameter","status","expected_rse","empirical_rse","robust_rse","ratio","converged","reps"
+"A1","One-compartment IV bolus","CL","identifiable",4.68812940384093,4.85780578353075,4.87140124639797,1.03619276796217,1000,1000
+"A1","One-compartment IV bolus","V","identifiable",4.74940790439526,4.55140630378045,4.5102467732014,0.958310255804399,1000,1000
+"A3","One-compartment oral, F known","CL","identifiable",4.96972641861379,5.17098717637435,5.0295004318191,1.04049735152558,1000,1000
+"A3","One-compartment oral, F known","V","identifiable",8.03649443987536,8.33881742726897,8.71283227233847,1.03761876395926,1000,1000
+"A3","One-compartment oral, F known","ka","identifiable",13.43789554661,14.2749086917912,14.3856709189245,1.06228751684205,1000,1000
+"A4","Two-compartment IV bolus","CL","identifiable",4.82099172838577,4.88364843575882,5.06820656475618,1.01299664278703,1000,1000
+"A4","Two-compartment IV bolus","Q","identifiable",11.5391931170024,11.7234788042852,12.1923158776249,1.01597041365147,1000,1000
+"A4","Two-compartment IV bolus","V1","identifiable",6.13776311860765,6.21484161828079,6.09415039533548,1.01255807664513,1000,1000
+"A4","Two-compartment IV bolus","V2","identifiable",11.6134070216033,12.0476816988316,11.9894432602704,1.03739425273052,1000,1000
+"A10_Rtot_known","Effect compartment, dynamic binding (known Cp), precise data","ke","identifiable",1.16831113656336,1.25549842771059,1.20292592285609,1.07462677399763,1000,1000
+"A10_Rtot_known","Effect compartment, dynamic binding (known Cp), precise data","ke0","identifiable",6.50183653917961,6.56430303045487,6.6027498603303,1.00960751487658,1000,1000
+"A10_Rtot_known","Effect compartment, dynamic binding (known Cp), precise data","koff","identifiable",8.30111080323672,8.44259935885315,8.5915149096809,1.01704453283063,1000,1000
+"A10_Rtot_known","Effect compartment, dynamic binding (known Cp), precise data","kon","identifiable",6.50038653771852,6.49556737591748,6.57087858178078,0.999258634579179,1000,1000
+"A10_Rtot_known","Same with noisier data (limitation: RSEs of 30-40%)","ke","identifiable",5.83350537886184,18.8284998322563,7.55484376326109,3.22764763369943,952,1000
+"A10_Rtot_known","Same with noisier data (limitation: RSEs of 30-40%)","ke0","unresolved",32.4589254336524,44.4615880512186,31.9805846412305,1.36978003606744,952,1000
+"A10_Rtot_known","Same with noisier data (limitation: RSEs of 30-40%)","koff","unresolved",41.4447886288711,53.5812652833989,38.6134843162724,1.2928348064025,952,1000
+"A10_Rtot_known","Same with noisier data (limitation: RSEs of 30-40%)","kon","unresolved",32.4492548789409,42.3029682368384,32.1232230803237,1.30366531973258,952,1000
+"A5","Michaelis-Menten elimination, low concentrations (expected: unresolved)","KM","unresolved",150.247358458996,142.481699399792,120.830524695241,0.948314172449676,797,1000
+"A5","Michaelis-Menten elimination, low concentrations (expected: unresolved)","V","identifiable",5.43648543684461,4.75395260594272,4.53603980242077,0.874453295455153,797,1000
+"A5","Michaelis-Menten elimination, low concentrations (expected: unresolved)","VMAX","unresolved",97.6385656827452,90.7977958838267,69.6985843683491,0.929937829882241,797,1000
