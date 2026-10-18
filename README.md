@@ -110,3 +110,8 @@ The analysis scripts are in `case-studies/`.
 ## License
 
 GPL-3
+
+## Related writing
+
+- [pkident on the author's site](https://daikikumakura.github.io/software/pkident.html): summary, installation and related analyses.
+- Related analyses by the same author on PK/PD modeling and what the data can identify: [warfarin PK/PD reanalysis](https://daikikumakura.github.io/writing/warfarin-pkpd.html), [nimotuzumab population PK](https://daikikumakura.github.io/writing/nimotuzumab-poppk-en.html), [tarlatamab summary PK](https://daikikumakura.github.io/writing/tarlatamab-summary-pk-en.html).
