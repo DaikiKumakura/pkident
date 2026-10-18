@@ -4,3 +4,5 @@
 ^.*\.Rproj$
 ^case-studies$
 ^\.github$
+^CITATION\.cff$
+^LICENSE\.md$

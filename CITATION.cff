@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "pkident: Structural and Practical Identifiability for Pharmacokinetic and Pharmacodynamic Models"
+authors:
+  - family-names: Kumakura
+    given-names: Daiki
+    orcid: "https://orcid.org/0000-0001-9859-0720"
+version: "0.1.0"
+date-released: "2026-10-05"
+repository-code: "https://github.com/DaikiKumakura/pkident"
+url: "https://daikikumakura.github.io/software/pkident.html"
+license: GPL-3.0-only
+abstract: >-
+  An R package for structural and practical identifiability of PK/PD ODE models built on rxode2: which parameters can be determined from given outputs and doses, how precisely a sampling design would estimate them, and whether likelihood profiles of nlmixr2 fits are bounded or flat.
+keywords:
+  - "identifiability"
+  - "pharmacometrics"
+  - "pharmacokinetics"
+  - "PK/PD"
+  - "rxode2"
+  - "nlmixr2"
+  - "R package"
