@@ -17,6 +17,10 @@ Every decision is **local** and says so, and anything the methods cannot decide 
 ## Installation
 
 ```r
+# Binary from R-universe (no compiler needed)
+install.packages("pkident", repos = c("https://daikikumakura.r-universe.dev", "https://cloud.r-project.org"))
+
+# Or from source
 # install.packages("remotes")
 remotes::install_github("DaikiKumakura/pkident")
 ```
