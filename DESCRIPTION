@@ -7,7 +7,7 @@ Description: Determines which parameters of pharmacokinetic and pharmacodynamic
     and observation design, and which added measurement would make the others
     identifiable. Decisions are local and are stated as such.
 License: GPL-3
-URL: https://github.com/DaikiKumakura/pkident
+URL: https://daikikumakura.github.io/pkident/, https://github.com/DaikiKumakura/pkident
 BugReports: https://github.com/DaikiKumakura/pkident/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

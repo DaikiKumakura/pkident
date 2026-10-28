@@ -1,0 +1,45 @@
+url: https://daikikumakura.github.io/pkident/
+
+template:
+  bootstrap: 5
+
+home:
+  title: "pkident: structural and practical identifiability for PK/PD ODE models in R"
+  description: >
+    pkident determines which parameters of pharmacokinetic and pharmacodynamic
+    ODE models (rxode2) can be identified from a given dosing and observation
+    design, how precisely a sampling design would estimate them, and whether
+    likelihood profiles of nlmixr2 fits are bounded or flat.
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+  - title: Define a problem
+    desc: Describe the model, the doses, the observed outputs and the residual error.
+    contents:
+      - pkpd_model
+      - bolus_dose
+      - infusion_dose
+      - residual_error
+      - experiment
+  - title: Structural identifiability
+    desc: Which parameters, or combinations such as V/F, can be determined from noise-free continuous data.
+    contents:
+      - structural_identifiability
+  - title: Practical identifiability and design
+    desc: How precisely a sampling design would estimate each parameter, and which added measurement would help.
+    contents:
+      - practical_identifiability
+      - compare_designs
+  - title: Fitted models
+    desc: Whether the likelihood profiles of an nlmixr2 fit are bounded or flat.
+    contents:
+      - classify_profiles
+  - title: Reference models and results
+    contents:
+      - reference_models
+      - reference_model
+      - as_table

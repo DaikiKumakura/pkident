@@ -7,3 +7,4 @@ case-studies/results/*.log
 inst/doc
 /doc/
 /Meta/
+docs/
