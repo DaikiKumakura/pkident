@@ -6,6 +6,8 @@
 
 Structural and practical identifiability for pharmacokinetic and pharmacodynamic ODE models, built on rxode2.
 
+**Documentation:** [daikikumakura.github.io/pkident](https://daikikumakura.github.io/pkident/) (function reference and three case studies).
+
 pkident answers three questions about a model before (or after) it is fitted:
 
 1. **Structure.** With continuous, noise-free observation of the chosen outputs after the known doses, which parameters can be determined at all? Which combinations (for example `V/F`) can?
