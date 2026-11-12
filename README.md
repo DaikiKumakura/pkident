@@ -1,6 +1,7 @@
 # pkident
 
 <!-- badges: start -->
+[![R-universe](https://daikikumakura.r-universe.dev/badges/pkident)](https://daikikumakura.r-universe.dev/pkident)
 [![R-CMD-check](https://github.com/DaikiKumakura/pkident/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DaikiKumakura/pkident/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -19,7 +20,7 @@ Every decision is **local** and says so, and anything the methods cannot decide 
 ## Installation
 
 ```r
-# Binary from R-universe (no compiler needed)
+# From R-universe (binaries where available)
 install.packages("pkident", repos = c("https://daikikumakura.r-universe.dev", "https://cloud.r-project.org"))
 
 # Or from source
