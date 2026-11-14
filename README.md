@@ -3,6 +3,7 @@
 <!-- badges: start -->
 [![R-universe](https://daikikumakura.r-universe.dev/badges/pkident)](https://daikikumakura.r-universe.dev/pkident)
 [![R-CMD-check](https://github.com/DaikiKumakura/pkident/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DaikiKumakura/pkident/actions/workflows/R-CMD-check.yaml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24210472.svg)](https://doi.org/10.5281/zenodo.24210472)
 <!-- badges: end -->
 
 Structural and practical identifiability for pharmacokinetic and pharmacodynamic ODE models, built on rxode2.
@@ -121,4 +122,5 @@ GPL-3
 ## Related writing
 
 - [pkident on the author's site](https://daikikumakura.github.io/software/pkident.html): summary, installation and related analyses.
+- Glossary: [practical identifiability](https://daikikumakura.github.io/glossary/practical-identifiability.html), [structural identifiability](https://daikikumakura.github.io/glossary/structural-identifiability.html) and [profile likelihood](https://daikikumakura.github.io/glossary/profile-likelihood.html).
 - Related analyses by the same author on PK/PD modeling and what the data can identify: [warfarin PK/PD reanalysis](https://daikikumakura.github.io/writing/warfarin-pkpd.html), [nimotuzumab population PK](https://daikikumakura.github.io/writing/nimotuzumab-poppk-en.html), [tarlatamab summary PK](https://daikikumakura.github.io/writing/tarlatamab-summary-pk-en.html).

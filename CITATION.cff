@@ -8,6 +8,10 @@ authors:
     orcid: "https://orcid.org/0000-0001-9859-0720"
 version: "0.1.0"
 date-released: "2026-10-05"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24210472"
+    description: "Archived release (Zenodo)"
 repository-code: "https://github.com/DaikiKumakura/pkident"
 url: "https://daikikumakura.github.io/software/pkident.html"
 license: GPL-3.0-only
