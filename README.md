@@ -152,7 +152,7 @@ function.
 | Expected RSEs against 1,000 repeated estimates on simulated data | Ratio 0.96–1.08 in four scenarios; limitations at RSEs of 30–40% documented |
 | Profile classification on three synthetic nlmixr2 fits | All ten parameters classified as expected |
 
-Details are in [`validation/`](validation/). R CMD check passes in CI.
+Details are in [`validation/`](https://github.com/DaikiKumakura/pkident/tree/master/validation). R CMD check passes in CI.
 
 ## Case studies
 
@@ -165,7 +165,7 @@ Details are in [`validation/`](validation/). R CMD check passes in CI.
   twice the time to nadir after the start of treatment.
 
 They are articles on the documentation site; the analysis scripts are in
-[`case-studies/`](case-studies/).
+[`case-studies/`](https://github.com/DaikiKumakura/pkident/tree/master/case-studies).
 
 ## Scope and limits
 
@@ -192,7 +192,7 @@ They are articles on the documentation site; the analysis scripts are in
 ## Citation
 
 Cite the archived version: <https://doi.org/10.5281/zenodo.24210472>. The
-citation metadata is in [`CITATION.cff`](CITATION.cff).
+citation metadata is in [`CITATION.cff`](https://github.com/DaikiKumakura/pkident/blob/master/CITATION.cff).
 
 ## License
 
