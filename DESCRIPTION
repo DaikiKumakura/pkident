@@ -3,9 +3,14 @@ Title: Structural and Practical Identifiability for Pharmacokinetic and Pharmaco
 Version: 0.1.0
 Authors@R: person("Daiki", "Kumakura", role = c("aut", "cre"), email = "55353329+DaikiKumakura@users.noreply.github.com")
 Description: Determines which parameters of pharmacokinetic and pharmacodynamic
-    ordinary differential equation models can be identified from a given dosing
-    and observation design, and which added measurement would make the others
-    identifiable. Decisions are local and are stated as such.
+    ordinary differential equation models written in 'rxode2' can be
+    identified. Structural identifiability (which parameters and which
+    combinations can be determined from the observed outputs and known doses)
+    is decided by two independent methods that must agree. Practical
+    identifiability gives the expected precision of each parameter for a
+    sampling design and compares designs. Likelihood profiles of 'nlmixr2'
+    fits are classified as bounded, one-sided, flat or shallow and linked to
+    the structural result. Decisions are local and are stated as such.
 License: GPL-3
 URL: https://daikikumakura.github.io/pkident/, https://github.com/DaikiKumakura/pkident
 BugReports: https://github.com/DaikiKumakura/pkident/issues

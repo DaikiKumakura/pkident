@@ -43,3 +43,6 @@ reference:
       - reference_models
       - reference_model
       - as_table
+  - title: Package
+    contents:
+      - pkident-package
