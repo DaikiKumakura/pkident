@@ -6,32 +6,65 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24210472.svg)](https://doi.org/10.5281/zenodo.24210472)
 <!-- badges: end -->
 
-Structural and practical identifiability for pharmacokinetic and pharmacodynamic ODE models, built on rxode2.
+**Which parameters of a PK/PD model can the data determine? Structural and
+practical identifiability for ODE models written in rxode2.**
 
-**Documentation:** [daikikumakura.github.io/pkident](https://daikikumakura.github.io/pkident/) (function reference and three case studies).
+pkident checks a pharmacokinetic or pharmacodynamic model before or after it
+is fitted:
 
-pkident answers three questions about a model before (or after) it is fitted:
+- **Structure:** with the chosen outputs and known doses, which parameters
+  can be determined at all, and which combinations (such as `CL/F`) can?
+- **Design:** with these sampling times, doses and assay error, how precisely
+  would each parameter be estimated, and which change to the design helps?
+- **Fit:** in an nlmixr2 fit, which parameters do the data actually determine,
+  and is a flat profile a property of the model or of the data?
 
-1. **Structure.** With continuous, noise-free observation of the chosen outputs after the known doses, which parameters can be determined at all? Which combinations (for example `V/F`) can?
-2. **Design.** With these sampling times, doses and assay error, how precisely would each parameter be estimated? Which added measurement, sampling time or dose level would help?
-3. **Fit.** In an nlmixr2 fit, which parameters do the data actually determine, and is a flat profile a property of the model or of the data?
+Every decision is **local** and says so. Anything the methods cannot decide
+is reported as `unresolved` rather than guessed, and two independent methods
+must agree before a structural decision is made.
 
-Every decision is **local** and says so, and anything the methods cannot decide is reported as `unresolved` rather than guessed.
+**Documentation:** <https://daikikumakura.github.io/pkident/> (function
+reference and three case studies)
+
+## Workflow
+
+```text
+   model (rxode2 ODEs) + outputs + doses
+                 │
+   pkpd_model()                       describe what is observed and known
+                 │
+   structural_identifiability()       can the parameters be determined at all?
+                 │
+   practical_identifiability()        how precisely, with this design?
+   compare_designs()                  which design is better?
+                 │
+   classify_profiles()                what did an nlmixr2 fit determine?
+```
+
+| Question | Function | Answer | Needs |
+|---|---|---|---|
+| Describe the model | `pkpd_model()`, `bolus_dose()`, `infusion_dose()`, `reference_model()` | a model object with outputs, doses and known quantities | rxode2 |
+| Structure | `structural_identifiability()` | `identifiable`, `combination_only`, `non_identifiable` or `unresolved` per parameter, with the identifiable combinations | symengine |
+| Design | `practical_identifiability()`, `compare_designs()`, `experiment()`, `residual_error()` | expected RSE per parameter, condition number, weakest direction | — |
+| Fit | `classify_profiles()` | bounded, one-sided, flat or shallow profile per parameter, linked to the structural result | nlmixr2est, nlmixr2extra |
+| Report | `as_table()` | a data frame of any result | — |
 
 ## Installation
 
 ```r
-# From R-universe (binaries where available)
-install.packages("pkident", repos = c("https://daikikumakura.r-universe.dev", "https://cloud.r-project.org"))
-
-# Or from source
-# install.packages("remotes")
-remotes::install_github("DaikiKumakura/pkident")
+install.packages("pkident", repos = c(
+  "https://daikikumakura.r-universe.dev",
+  "https://cloud.r-project.org"
+))
 ```
 
-pkident needs rxode2 and symengine. `classify_profiles()` also needs nlmixr2est and nlmixr2extra.
+Or from GitHub: `remotes::install_github("DaikiKumakura/pkident")`. pkident
+needs rxode2 and symengine; `classify_profiles()` also needs nlmixr2est and
+nlmixr2extra.
 
-## Structural identifiability
+## Quick start: structure
+
+An oral one-compartment model with unknown bioavailability:
 
 ```r
 library(pkident)
@@ -58,27 +91,44 @@ structural_identifiability(m)
 #>   CL/V
 ```
 
-Two independent methods must agree: Lie derivatives of the outputs evaluated at the known initial state (which keeps the information a dose gives about volumes), and the rank and null space of output sensitivities solved with rxode2. Known input signals, such as a plasma concentration driving a pharmacodynamic model, are supported.
+Only `ka` and the ratios `CL/F` and `CL/V` are determined. The two methods
+are Lie derivatives of the outputs at the known initial state (which keeps
+what a dose tells about volumes) and the rank and null space of output
+sensitivities solved with rxode2. Known input signals, such as a plasma
+concentration driving a PD model, are supported.
 
-## Practical identifiability of a design
+## Design: how precise would the estimates be?
+
+The same model with `F` known (`reference_model("A3")`), sampled three times
+in the first two hours, and then eight times up to 24 hours:
 
 ```r
-practical_identifiability(
-  reference_model("A3"),                       # oral, F known
-  design = c(0.5, 1, 2),
-  values = c(ka = 1, CL = 2, V = 20, DOSE = 100),
-  error  = residual_error(add = 0.05, prop = 0.1)
-)
+values <- c(ka = 1, CL = 2, V = 20, DOSE = 100)
+error  <- residual_error(add = 0.05, prop = 0.1)
+
+practical_identifiability(reference_model("A3"), design = c(0.5, 1, 2),
+                          values = values, error = error)
 #> Condition number (log scale): 36900
 #>   CL           RSE    975.1%  unresolved
 #>   V            RSE    224.2%  unresolved
 #>   ka           RSE    257.2%  unresolved
 #> Weakest direction: +0.94 log(CL) -0.25 log(ka) -0.22 log(V) (expected SD on log scale 10.3)
+
+practical_identifiability(reference_model("A3"), design = c(0.5, 1, 2, 4, 6, 8, 12, 24),
+                          values = values, error = error)
+#> Condition number (log scale): 13.3
+#>   CL           RSE      4.7%  identifiable
+#>   V            RSE      7.1%  identifiable
+#>   ka           RSE     14.6%  identifiable
 ```
 
-Three samples in the first two hours do not observe elimination; eight samples up to 24 hours give RSEs of 5–13%. `compare_designs()` puts candidate designs side by side, with the structural status for the outputs each candidate observes. Doses can be given as event tables (repeated infusions), and residual error can be additive, proportional, combined or exponential.
+Three early samples do not observe elimination. `compare_designs()` puts
+candidate designs side by side, with the structural status for the outputs
+each one observes. Doses can be event tables (for example repeated
+infusions), and residual error can be additive, proportional, combined or
+exponential.
 
-## Likelihood profiles of an nlmixr2 fit
+## Fit: what did the data determine?
 
 ```r
 classify_profiles(fit, structural = structural_identifiability(emax_model),
@@ -87,7 +137,11 @@ classify_profiles(fit, structural = structural_identifiability(emax_model),
 #>          -> structurally identifiable but not determined by these data (structural: identifiable)
 ```
 
-Profiles are classified as bounded, one-sided, flat or shallow (Raue et al. 2009). Each profile point is re-estimated from a neighbouring point when needed, because a stuck re-estimation can only overstate the objective function.
+Profiles are classified as bounded, one-sided, flat or shallow (Raue et al.
+2009) and compared with the structural result, which tells a model problem
+from a data problem. A profile point is re-estimated from a neighbouring point
+when needed, because a stuck re-estimation can only overstate the objective
+function.
 
 ## Validation
 
@@ -98,29 +152,48 @@ Profiles are classified as bounded, one-sided, flat or shallow (Raue et al. 2009
 | Expected RSEs against 1,000 repeated estimates on simulated data | Ratio 0.96–1.08 in four scenarios; limitations at RSEs of 30–40% documented |
 | Profile classification on three synthetic nlmixr2 fits | All ten parameters classified as expected |
 
-Details: `validation/` in this repository.
+Details are in [`validation/`](validation/). R CMD check passes in CI.
 
-## Vignettes and case studies
+## Case studies
 
-* *Structural identifiability of reference PK/PD models*
-* *Case study: nimotuzumab target-mediated disposition* — with the public `nimoData` (nlmixr2data), clearance, volume and koff are determined, kon, kdeg, target baseline and kint are not, and measuring total target would determine six of the seven parameters.
-* *Case study: PSA decline and regrowth* — the regrowth rate becomes estimable only about twice the time to nadir after the start of treatment.
+- *Structural identifiability of reference PK/PD models.*
+- *Nimotuzumab target-mediated disposition:* with the public `nimoData`
+  (nlmixr2data), clearance, volume and koff are determined, kon, kdeg, target
+  baseline and kint are not, and measuring total target would determine six
+  of the seven parameters.
+- *PSA decline and regrowth:* the regrowth rate becomes estimable only about
+  twice the time to nadir after the start of treatment.
 
-The analysis scripts are in `case-studies/`.
+They are articles on the documentation site; the analysis scripts are in
+[`case-studies/`](case-studies/).
 
 ## Scope and limits
 
-* Decisions are local. A locally identifiable parameter can have a finite number of alternative values (for example the flip-flop of absorption and elimination).
-* Fixed effects of a typical individual. Identifiability of between-subject variability and population designs are not covered (see PopED for optimal design).
-* Closed-form models (`linCmt()`) must be written as ODEs.
-* The expected information is a local, linear approximation; it is reliable when RSEs are below about 30%, and profiles should be examined otherwise.
+- Decisions are local. A locally identifiable parameter can have a finite
+  number of alternative values (for example the flip-flop of absorption and
+  elimination).
+- Fixed effects of a typical individual. Identifiability of between-subject
+  variability and population designs are not covered (see PopED for optimal
+  design).
+- Closed-form models (`linCmt()`) must be written as ODEs.
+- The expected information is a local, linear approximation: reliable when
+  RSEs are below about 30%; examine likelihood profiles otherwise.
+
+## Related reading
+
+- Glossary: [structural identifiability](https://daikikumakura.github.io/glossary/structural-identifiability.html),
+  [practical identifiability](https://daikikumakura.github.io/glossary/practical-identifiability.html),
+  [profile likelihood](https://daikikumakura.github.io/glossary/profile-likelihood.html).
+- Analyses on what PK/PD data can identify:
+  [warfarin PK/PD reanalysis](https://daikikumakura.github.io/writing/warfarin-pkpd.html),
+  [nimotuzumab population PK](https://daikikumakura.github.io/writing/nimotuzumab-poppk-en.html),
+  [tarlatamab summary PK](https://daikikumakura.github.io/writing/tarlatamab-summary-pk-en.html).
+
+## Citation
+
+Cite the archived version: <https://doi.org/10.5281/zenodo.24210472>. The
+citation metadata is in [`CITATION.cff`](CITATION.cff).
 
 ## License
 
 GPL-3
-
-## Related writing
-
-- [pkident on the author's site](https://daikikumakura.github.io/software/pkident.html): summary, installation and related analyses.
-- Glossary: [practical identifiability](https://daikikumakura.github.io/glossary/practical-identifiability.html), [structural identifiability](https://daikikumakura.github.io/glossary/structural-identifiability.html) and [profile likelihood](https://daikikumakura.github.io/glossary/profile-likelihood.html).
-- Related analyses by the same author on PK/PD modeling and what the data can identify: [warfarin PK/PD reanalysis](https://daikikumakura.github.io/writing/warfarin-pkpd.html), [nimotuzumab population PK](https://daikikumakura.github.io/writing/nimotuzumab-poppk-en.html), [tarlatamab summary PK](https://daikikumakura.github.io/writing/tarlatamab-summary-pk-en.html).
