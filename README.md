@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![R-universe](https://daikikumakura.r-universe.dev/badges/pkident)](https://daikikumakura.r-universe.dev/pkident)
 [![R-CMD-check](https://github.com/DaikiKumakura/pkident/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DaikiKumakura/pkident/actions/workflows/R-CMD-check.yaml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24210472.svg)](https://doi.org/10.5281/zenodo.24210472)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24210471.svg)](https://doi.org/10.5281/zenodo.24210471)
 <!-- badges: end -->
 
 **Which parameters of a PK/PD model can the data determine? Structural and
@@ -191,7 +191,7 @@ They are articles on the documentation site; the analysis scripts are in
 
 ## Citation
 
-Cite the archived version: <https://doi.org/10.5281/zenodo.24210472>. The
+Cite the archived version: <https://doi.org/10.5281/zenodo.24210471>. The
 citation metadata is in [`CITATION.cff`](https://github.com/DaikiKumakura/pkident/blob/master/CITATION.cff).
 
 ## License
