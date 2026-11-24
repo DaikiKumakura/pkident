@@ -2,6 +2,13 @@ url: https://daikikumakura.github.io/pkident/
 
 template:
   bootstrap: 5
+  bslib:
+    bg: "#ffffff"
+    fg: "#252525"
+    primary: "#25577b"
+    border-color: "#dddddd"
+    line-height-base: 1.65
+    headings-font-weight: 500
 
 home:
   title: "pkident: structural and practical identifiability for PK/PD ODE models in R"
@@ -12,9 +19,30 @@ home:
     likelihood profiles of nlmixr2 fits are bounded or flat.
 
 navbar:
+  bg: light
+  type: light
   structure:
-    left: [intro, reference, articles, news]
+    left: [start, reference, articles, news, downloads]
     right: [search, github]
+  components:
+    start:
+      text: Get started
+      menu:
+        - text: Install
+          href: "index.html#installation"
+        - text: First example
+          href: "index.html#quick-start-structure"
+    downloads:
+      text: Downloads
+      menu:
+        - text: Release
+          href: "https://github.com/DaikiKumakura/pkident/releases/tag/v0.1.0"
+        - text: R-universe
+          href: "https://daikikumakura.r-universe.dev/pkident"
+        - text: Zenodo
+          href: "https://doi.org/10.5281/zenodo.24210472"
+        - text: Portfolio
+          href: "https://daikikumakura.github.io/software/pkident.html"
 
 reference:
   - title: Define a problem
