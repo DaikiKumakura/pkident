@@ -227,4 +227,4 @@ citation metadata is in [`CITATION.cff`](https://github.com/DaikiKumakura/pkiden
 
 ## License
 
-GPL-3
+This project is licensed under GPL-3.0-only. See [LICENSE.md](LICENSE.md) for the license terms.
