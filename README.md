@@ -226,8 +226,9 @@ Details are in [`validation/`](https://github.com/DaikiKumakura/pkident/tree/mas
 
 ## Citation
 
-Cite the archived version: <https://doi.org/10.5281/zenodo.24210471>. The
-citation metadata is in [`CITATION.cff`](https://github.com/DaikiKumakura/pkident/blob/master/CITATION.cff).
+Kumakura, D. (2026). *pkident: Structural and Practical Identifiability for Pharmacokinetic and Pharmacodynamic Models* [Software]. [DOI: 10.5281/zenodo.24210471](https://doi.org/10.5281/zenodo.24210471).
+
+Citation metadata: [CITATION.cff](CITATION.cff).
 
 ## License
 
