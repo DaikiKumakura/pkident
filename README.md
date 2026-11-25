@@ -9,46 +9,6 @@
 **Which parameters of a PK/PD model can the data determine? Structural and
 practical identifiability for ODE models written in rxode2.**
 
-pkident checks a pharmacokinetic or pharmacodynamic model before or after it
-is fitted:
-
-- **Structure:** with the chosen outputs and known doses, which parameters
-  can be determined at all, and which combinations (such as `CL/F`) can?
-- **Design:** with these sampling times, doses and assay error, how precisely
-  would each parameter be estimated, and which change to the design helps?
-- **Fit:** in an nlmixr2 fit, which parameters do the data actually determine,
-  and is a flat profile a property of the model or of the data?
-
-Every decision is **local** and says so. Anything the methods cannot decide
-is reported as `unresolved` rather than guessed, and two independent methods
-must agree before a structural decision is made.
-
-**Documentation:** <https://daikikumakura.github.io/pkident/> (function
-reference and three case studies)
-
-## Workflow
-
-```text
-   model (rxode2 ODEs) + outputs + doses
-                 │
-   pkpd_model()                       describe what is observed and known
-                 │
-   structural_identifiability()       can the parameters be determined at all?
-                 │
-   practical_identifiability()        how precisely, with this design?
-   compare_designs()                  which design is better?
-                 │
-   classify_profiles()                what did an nlmixr2 fit determine?
-```
-
-| Question | Function | Answer | Needs |
-|---|---|---|---|
-| Describe the model | `pkpd_model()`, `bolus_dose()`, `infusion_dose()`, `reference_model()` | a model object with outputs, doses and known quantities | rxode2 |
-| Structure | `structural_identifiability()` | `identifiable`, `combination_only`, `non_identifiable` or `unresolved` per parameter, with the identifiable combinations | symengine |
-| Design | `practical_identifiability()`, `compare_designs()`, `experiment()`, `residual_error()` | expected RSE per parameter, condition number, weakest direction | — |
-| Fit | `classify_profiles()` | bounded, one-sided, flat or shallow profile per parameter, linked to the structural result | nlmixr2est, nlmixr2extra |
-| Report | `as_table()` | a data frame of any result | — |
-
 ## Installation
 
 ```r
@@ -62,7 +22,9 @@ Or from GitHub: `remotes::install_github("DaikiKumakura/pkident")`. pkident
 needs rxode2 and symengine; `classify_profiles()` also needs nlmixr2est and
 nlmixr2extra.
 
-## Quick start: structure
+<a id="quick-start-structure"></a>
+
+## Quick start
 
 An oral one-compartment model with unknown bioavailability:
 
@@ -97,7 +59,59 @@ what a dose tells about volumes) and the rank and null space of output
 sensitivities solved with rxode2. Known input signals, such as a plasma
 concentration driving a PD model, are supported.
 
+## Documentation
+
+[Function reference](https://daikikumakura.github.io/pkident/reference/) · [Changelog](https://daikikumakura.github.io/pkident/news/) · [Releases](https://github.com/DaikiKumakura/pkident/releases)
+
+## Workflow
+
+<details>
+<summary>Show details</summary>
+
+pkident checks a pharmacokinetic or pharmacodynamic model before or after it
+is fitted:
+
+- **Structure:** with the chosen outputs and known doses, which parameters
+  can be determined at all, and which combinations (such as `CL/F`) can?
+- **Design:** with these sampling times, doses and assay error, how precisely
+  would each parameter be estimated, and which change to the design helps?
+- **Fit:** in an nlmixr2 fit, which parameters do the data actually determine,
+  and is a flat profile a property of the model or of the data?
+
+Every decision is **local** and says so. Anything the methods cannot decide
+is reported as `unresolved` rather than guessed, and two independent methods
+must agree before a structural decision is made.
+
+**Documentation:** <https://daikikumakura.github.io/pkident/> (function
+reference and three case studies)
+
+```text
+   model (rxode2 ODEs) + outputs + doses
+                 │
+   pkpd_model()                       describe what is observed and known
+                 │
+   structural_identifiability()       can the parameters be determined at all?
+                 │
+   practical_identifiability()        how precisely, with this design?
+   compare_designs()                  which design is better?
+                 │
+   classify_profiles()                what did an nlmixr2 fit determine?
+```
+
+| Question | Function | Answer | Needs |
+|---|---|---|---|
+| Describe the model | `pkpd_model()`, `bolus_dose()`, `infusion_dose()`, `reference_model()` | a model object with outputs, doses and known quantities | rxode2 |
+| Structure | `structural_identifiability()` | `identifiable`, `combination_only`, `non_identifiable` or `unresolved` per parameter, with the identifiable combinations | symengine |
+| Design | `practical_identifiability()`, `compare_designs()`, `experiment()`, `residual_error()` | expected RSE per parameter, condition number, weakest direction | — |
+| Fit | `classify_profiles()` | bounded, one-sided, flat or shallow profile per parameter, linked to the structural result | nlmixr2est, nlmixr2extra |
+| Report | `as_table()` | a data frame of any result | — |
+
+</details>
+
 ## Design: how precise would the estimates be?
+
+<details>
+<summary>Show details</summary>
 
 The same model with `F` known (`reference_model("A3")`), sampled three times
 in the first two hours, and then eight times up to 24 hours:
@@ -128,7 +142,12 @@ each one observes. Doses can be event tables (for example repeated
 infusions), and residual error can be additive, proportional, combined or
 exponential.
 
+</details>
+
 ## Fit: what did the data determine?
+
+<details>
+<summary>Show details</summary>
 
 ```r
 classify_profiles(fit, structural = structural_identifiability(emax_model),
@@ -143,6 +162,8 @@ from a data problem. A profile point is re-estimated from a neighbouring point
 when needed, because a stuck re-estimation can only overstate the objective
 function.
 
+</details>
+
 ## Validation
 
 | Check | Result |
@@ -156,6 +177,9 @@ Details are in [`validation/`](https://github.com/DaikiKumakura/pkident/tree/mas
 
 ## Case studies
 
+<details>
+<summary>Show details</summary>
+
 - *Structural identifiability of reference PK/PD models.*
 - *Nimotuzumab target-mediated disposition:* with the public `nimoData`
   (nlmixr2data), clearance, volume and koff are determined, kon, kdeg, target
@@ -166,6 +190,8 @@ Details are in [`validation/`](https://github.com/DaikiKumakura/pkident/tree/mas
 
 They are articles on the documentation site; the analysis scripts are in
 [`case-studies/`](https://github.com/DaikiKumakura/pkident/tree/master/case-studies).
+
+</details>
 
 ## Scope and limits
 
@@ -181,6 +207,9 @@ They are articles on the documentation site; the analysis scripts are in
 
 ## Related reading
 
+<details>
+<summary>Show details</summary>
+
 - Glossary: [structural identifiability](https://daikikumakura.github.io/glossary/structural-identifiability.html),
   [practical identifiability](https://daikikumakura.github.io/glossary/practical-identifiability.html),
   [profile likelihood](https://daikikumakura.github.io/glossary/profile-likelihood.html).
@@ -188,6 +217,8 @@ They are articles on the documentation site; the analysis scripts are in
   [warfarin PK/PD reanalysis](https://daikikumakura.github.io/writing/warfarin-pkpd.html),
   [nimotuzumab population PK](https://daikikumakura.github.io/writing/nimotuzumab-poppk-en.html),
   [tarlatamab summary PK](https://daikikumakura.github.io/writing/tarlatamab-summary-pk-en.html).
+
+</details>
 
 ## Citation
 

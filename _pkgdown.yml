@@ -31,7 +31,7 @@ navbar:
         - text: Install
           href: "index.html#installation"
         - text: First example
-          href: "index.html#quick-start-structure"
+          href: "index.html#quick-start"
     downloads:
       text: Downloads
       menu:
