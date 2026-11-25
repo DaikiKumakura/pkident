@@ -61,7 +61,7 @@ concentration driving a PD model, are supported.
 
 ## Documentation
 
-[Function reference](https://daikikumakura.github.io/pkident/reference/) · [Changelog](https://daikikumakura.github.io/pkident/news/) · [Releases](https://github.com/DaikiKumakura/pkident/releases)
+[Package website](https://daikikumakura.github.io/pkident/) · [Function reference](https://daikikumakura.github.io/pkident/reference/) · [Changelog](https://daikikumakura.github.io/pkident/news/) · [Releases](https://github.com/DaikiKumakura/pkident/releases) · [R-universe](https://daikikumakura.r-universe.dev/pkident)
 
 ## Workflow
 
@@ -164,17 +164,6 @@ function.
 
 </details>
 
-## Validation
-
-| Check | Result |
-| --- | --- |
-| Ten reference models with expected results fixed from the literature or by derivation (and one variant) | All decisions as expected at four seeds; the two structural methods agree at every point |
-| Fisher information against the analytic result | Relative difference 1e-11 (also for repeated doses from an event table) |
-| Expected RSEs against 1,000 repeated estimates on simulated data | Ratio 0.96–1.08 in four scenarios; limitations at RSEs of 30–40% documented |
-| Profile classification on three synthetic nlmixr2 fits | All ten parameters classified as expected |
-
-Details are in [`validation/`](https://github.com/DaikiKumakura/pkident/tree/master/validation). R CMD check passes in CI.
-
 ## Case studies
 
 <details>
@@ -193,7 +182,9 @@ They are articles on the documentation site; the analysis scripts are in
 
 </details>
 
-## Scope and limits
+<a id="scope-and-limits"></a>
+
+## Scope
 
 - Decisions are local. A locally identifiable parameter can have a finite
   number of alternative values (for example the flip-flop of absorption and
@@ -219,6 +210,19 @@ They are articles on the documentation site; the analysis scripts are in
   [tarlatamab summary PK](https://daikikumakura.github.io/writing/tarlatamab-summary-pk-en.html).
 
 </details>
+
+<a id="validation"></a>
+
+## Validation and limitations
+
+| Check | Result |
+| --- | --- |
+| Ten reference models with expected results fixed from the literature or by derivation (and one variant) | All decisions as expected at four seeds; the two structural methods agree at every point |
+| Fisher information against the analytic result | Relative difference 1e-11 (also for repeated doses from an event table) |
+| Expected RSEs against 1,000 repeated estimates on simulated data | Ratio 0.96–1.08 in four scenarios; limitations at RSEs of 30–40% documented |
+| Profile classification on three synthetic nlmixr2 fits | All ten parameters classified as expected |
+
+Details are in [`validation/`](https://github.com/DaikiKumakura/pkident/tree/master/validation). R CMD check passes in CI.
 
 ## Citation
 
