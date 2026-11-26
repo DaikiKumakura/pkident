@@ -1,0 +1,191 @@
+---
+title: "Getting started: can the data determine my parameters?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started: can the data determine my parameters?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+You have a PK model and a plan for sampling. Before the study, or before a fit that will not converge, you want
+to know three things: can the parameters be determined at all, how precisely will this design estimate them, and
+what would help. This page answers them for one model, in the order you would ask. All output below comes from
+running the code.
+
+## 1. Describe what is observed and what is known
+
+pkident takes an rxode2 model with three extra pieces of information, because the answer depends on them: which
+quantity is **observed** (`outputs`), how the dose enters (`doses`), and which values are **known** (`known`).
+
+```{r}
+library(pkident)
+
+m <- pkpd_model(
+  "d/dt(depot)   = -ka*depot
+   d/dt(central) = ka*depot - CL/V*central
+   cp            = central/V",
+  outputs = "cp",                                 # the concentration is measured
+  doses   = bolus_dose("depot", "F*DOSE"),        # a bolus into depot, of F x DOSE
+  known   = "DOSE"                                # the dose is known; F is not
+)
+```
+
+An oral one-compartment model with unknown bioavailability `F`. The dose reaching the system is `F*DOSE`, and
+only `DOSE` is known.
+
+## 2. Structure: can the parameters be determined at all?
+
+```{r}
+structural_identifiability(m)
+```
+
+```text
+<pkident structural identifiability>
+Decision is LOCAL (Lie derivatives at the known initial state up to order 8, checked by output sensitivities; 5 random points).
+Methods agree at 5 of 5 points.
+  CL           combination_only
+  F            combination_only
+  V            combination_only
+  ka           identifiable
+Identifiable combinations:
+  CL/F
+  CL/V
+```
+
+Read the four words:
+
+| Word | Meaning |
+|---|---|
+| `identifiable` | The data can determine the parameter by itself (`ka`). |
+| `combination_only` | The parameter cannot be separated, but a combination of it can (`CL`, `F`, `V`; the combinations are `CL/F` and `CL/V`). |
+| `non_identifiable` | Neither the parameter nor a combination of it. |
+| `unresolved` | The methods cannot decide; pkident says so instead of guessing. |
+
+Here the concentration only ever shows `F*DOSE` through `V`, so clearance and volume are determined only
+relative to `F`. No amount of sampling changes this; only a different experiment does, for example an
+intravenous dose given to the same subjects, or knowing `F`. The decision is **local** (at random points of the
+parameter space) and is made only when two independent methods agree: *Methods agree at 5 of 5 points*.
+
+## 3. Make `F` known and ask again
+
+`reference_model()` has the model with `F` known, among a set of textbook models checked against analytical
+results (`reference_models()` lists them):
+
+```{r}
+a3 <- reference_model("A3")
+a3
+structural_identifiability(a3)
+```
+
+```text
+<pkident_model>
+States:      depot, central
+Outputs:     cp
+Parameters:  CL, V, ka
+Known:       DOSE
+  d/dt(depot) = -ka*depot;  depot(0) = DOSE
+  d/dt(central) = ka*depot - CL*central/V;  central(0) = 0
+  cp = central/V
+<pkident structural identifiability>
+Decision is LOCAL (Lie derivatives at the known initial state up to order 3, checked by output sensitivities; 5 random points).
+Methods agree at 5 of 5 points.
+  CL           identifiable
+  V            identifiable
+  ka           identifiable
+```
+
+All three parameters are identifiable. This is the best case: continuous, noise-free observation.
+Structural identifiability says it is *possible*; it does not say your samples are enough.
+
+## 4. Design: how precisely, with these samples?
+
+Give the parameter values you expect, the residual error of the assay, and the sampling times.
+`practical_identifiability()` returns the expected relative standard error (RSE) of each parameter from the
+Fisher information:
+
+```{r}
+values <- c(ka = 1, CL = 2, V = 20, DOSE = 100)
+error  <- residual_error(add = 0.05, prop = 0.1)   # additive 0.05 plus 10% proportional
+
+practical_identifiability(a3, design = c(0.5, 1, 2), values = values, error = error)
+```
+
+```text
+<pkident practical identifiability>
+Expected Fisher information for 1 individual(s), 3 observations each; LOCAL (linear) approximation.
+Condition number (log scale): 36900
+  CL           RSE    975.1%  unresolved
+  V            RSE    224.2%  unresolved
+  ka           RSE    257.2%  unresolved
+Note: some RSEs exceed 30%; the linear approximation is unreliable and the RSEs of all parameters may be underestimated. Examine likelihood profiles.
+Weakest direction: +0.94 log(CL) -0.25 log(ka) -0.22 log(V) (expected SD on log scale 10.3)
+```
+
+Three samples in the first two hours see the absorption but hardly the elimination, so the RSE of `CL` is
+975%: the parameter is determinable in principle (section 3) and not with this design. The *weakest
+direction* names what the data cannot resolve here, mostly `log(CL)`. Samples out to 24 hours change that:
+
+```{r}
+practical_identifiability(a3, design = c(0.5, 1, 2, 4, 6, 8, 12, 24), values = values, error = error)
+```
+
+```text
+<pkident practical identifiability>
+Expected Fisher information for 1 individual(s), 8 observations each; LOCAL (linear) approximation.
+Condition number (log scale): 13.3
+  CL           RSE      4.7%  identifiable
+  V            RSE      7.1%  identifiable
+  ka           RSE     14.6%  identifiable
+Weakest direction: +0.93 log(ka) +0.37 log(V) (expected SD on log scale 0.156)
+```
+
+`unresolved` here means the RSE is above the limit (30% by default, `rse_limit`); `identifiable` means below.
+The numbers are a linear approximation at the values you gave; when they are above 30% treat them as a
+warning, not a measurement (the note says so).
+
+## 5. Compare candidate designs side by side
+
+`compare_designs()` takes named candidates, each an `experiment()`: sampling times, the dose, and the number of
+individuals. It adds the structural status for what each one observes:
+
+```{r}
+compare_designs(
+  a3,
+  candidates = list(
+    early_3     = experiment(c(0.5, 1, 2), values = c(DOSE = 100)),
+    full_8      = experiment(c(0.5, 1, 2, 4, 6, 8, 12, 24), values = c(DOSE = 100)),
+    early_3_x12 = experiment(c(0.5, 1, 2), values = c(DOSE = 100), n = 12)
+  ),
+  values = values, error = error
+)
+```
+
+```text
+<pkident design comparison>
+Expected RSE (%) from the Fisher information; structural status for the observed outputs (LOCAL).
+  parameter        early_3      full_8 early_3_x12
+  CL                 975.1         4.7       281.5
+  V                  224.2         7.1        64.7
+  ka                 257.2        14.6        74.3
+  identifiable         0/3         3/3         0/3
+Practically identifiable: RSE <= 30%.
+```
+
+Twelve individuals with the early design (`early_3_x12`) bring the RSE of `CL` from 975% to 282%; one individual
+with eight samples reaches 4.7%. When the design lacks late samples, more subjects do not replace them. No
+design is optimised: you supply the candidates and pkident reports each.
+
+## 6. Where to go next
+
+- **After a fit.** `classify_profiles()` takes an nlmixr2 fit and says, per parameter, whether the likelihood
+  profile is bounded, one-sided, flat or shallow, and whether that is a property of the model (compared with the
+  structural result) or of the data.
+- **Case studies.** [Nimotuzumab target-mediated disposition](nimotuzumab-tmdd.html),
+  [PSA follow-up for regrowth](psa-regrowth.html) and
+  [reference models](reference-models.html) use these functions on real questions.
+- `?pkpd_model` for infusions, known input signals and PD models; `as_table()` turns any result into a data
+  frame.
